@@ -29,9 +29,9 @@ export default function CharacterCard({ character }: { character: Character }) {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           </div>
-          <div className="absolute bottom-0 left-0 w-full p-4 text-white">
-            <h3 className="font-headline text-xl font-bold tracking-tight text-primary-foreground">{character.name}</h3>
-            <p className="mt-1 truncate text-sm text-primary-foreground/80">{character.intro}</p>
+          <div className="absolute bottom-0 left-0 w-full p-4">
+            <h3 className="font-headline text-xl font-bold tracking-tight text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.8)]">{character.name}</h3>
+            <p className="mt-1 truncate text-sm text-neutral-200 [text-shadow:0_1px_2px_rgba(0,0,0,0.8)]">{character.intro}</p>
           </div>
         </CardContent>
       </Card>
