@@ -91,20 +91,16 @@ export async function uploadImage(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    console.error('Upload error: User is not authenticated.');
     return { error: 'Unauthorized. You must be logged in to upload an image.' };
   }
 
   const filePath = `${user.id}/${Date.now()}-${file.name}`;
-
-  console.log(`Uploading file for user ${user.id} to path: ${filePath}`);
 
   const { data, error } = await supabase.storage
     .from('character-images')
     .upload(filePath, file);
 
   if (error) {
-    console.error('Supabase storage upload error:', JSON.stringify(error, null, 2));
     return { error: `Upload failed: ${error.message}` };
   }
   
