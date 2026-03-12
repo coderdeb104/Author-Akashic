@@ -1,13 +1,13 @@
 'use client'
 
-import { useFormState, useFormStatus } from 'react-dom'
+import { useFormStatus } from 'react-dom'
 import { login, signup } from '@/app/auth/actions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useActionState } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Wand2 } from 'lucide-react'
 
@@ -15,7 +15,7 @@ type Mode = 'login' | 'signup'
 
 export function AuthForm({ mode }: { mode: Mode }) {
   const action = mode === 'login' ? login : signup
-  const [state, formAction] = useFormState(action, null)
+  const [state, formAction] = useActionState(action, null)
   const { toast } = useToast()
 
   useEffect(() => {
