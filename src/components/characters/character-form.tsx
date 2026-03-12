@@ -22,6 +22,7 @@ import ImageUploader from './image-uploader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
     name: z.string().min(1, 'Name is required.'),
@@ -33,6 +34,9 @@ const formSchema = z.object({
       z.coerce.number({invalid_type_error: "Age must be a number."}).positive("Age must be positive.").optional().nullable()
     ),
     sex: z.string().optional().nullable(),
+    race: z.string().optional().nullable(),
+    spouse: z.string().optional().nullable(),
+    vital_status: z.string().optional().nullable(),
     role: z.string().optional().nullable(),
     appearance: z.object({
       height: z.string().optional().nullable(),
@@ -47,7 +51,7 @@ const formSchema = z.object({
 
 type CharacterFormData = z.infer<typeof formSchema>;
 
-export default function CharacterForm({ character }: { character?: Pick<Character, 'id' | 'name' | 'intro' | 'age' | 'sex' | 'role' | 'appearance' | 'description' | 'trivia' | 'image_url'> | null }) {
+export default function CharacterForm({ character }: { character?: Pick<Character, 'id' | 'name' | 'intro' | 'age' | 'sex' | 'role' | 'appearance' | 'description' | 'trivia' | 'image_url' | 'race' | 'spouse' | 'vital_status'> | null }) {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -58,6 +62,9 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
             intro: character?.intro ?? '',
             age: character?.age ?? undefined,
             sex: character?.sex ?? '',
+            race: character?.race ?? '',
+            spouse: character?.spouse ?? '',
+            vital_status: character?.vital_status ?? '',
             role: character?.role ?? '',
             appearance: {
                 height: character?.appearance?.height ?? '',
@@ -134,15 +141,43 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
                             <CardContent className="space-y-4">
                                 <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="Character's full name" {...field} /></FormControl><FormMessage /></FormItem> )} />
                                 <FormField control={form.control} name="intro" render={({ field }) => ( <FormItem><FormLabel>5-Word Intro</FormLabel><FormControl><Input placeholder="Brave, loyal, and always hungry" {...field} value={field.value ?? ''} /></FormControl><FormDescription>A short, punchy introduction.</FormDescription><FormMessage /></FormItem> )} />
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <FormField control={form.control} name="age" render={({ field }) => ( <FormItem><FormLabel>Age</FormLabel><FormControl><Input type="number" placeholder="27" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
-                                    <FormField control={form.control} name="sex" render={({ field }) => ( <FormItem><FormLabel>Sex</FormLabel><FormControl><Input placeholder="e.g., Male, Female, Non-binary" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
-                                    <FormField control={form.control} name="role" render={({ field }) => ( <FormItem><FormLabel>Role</FormLabel><FormControl><Input placeholder="e.g., Protagonist, Antagonist, Sidekick" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="sex" render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>Sex</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                          <FormControl>
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Select sex" />
+                                            </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                            <SelectItem value="Male">Male</SelectItem>
+                                            <SelectItem value="Female">Female</SelectItem>
+                                            <SelectItem value="Other">Other</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )} />
                                 </div>
                             </CardContent>
                         </Card>
                     </div>
                 </div>
+
+                <Card>
+                    <CardHeader><CardTitle className="font-headline">Personal Details</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <FormField control={form.control} name="race" render={({ field }) => ( <FormItem><FormLabel>Race</FormLabel><FormControl><Input placeholder="e.g., Human, Elf" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="spouse" render={({ field }) => ( <FormItem><FormLabel>Spouse</FormLabel><FormControl><Input placeholder="e.g., 'Name' or 'None'" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="vital_status" render={({ field }) => ( <FormItem><FormLabel>Vital Status</FormLabel><FormControl><Input placeholder="e.g., Alive, Deceased" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="role" render={({ field }) => ( <FormItem><FormLabel>Role</FormLabel><FormControl><Input placeholder="e.g., Protagonist, Antagonist" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                      </div>
+                    </CardContent>
+                </Card>
 
                 <Card>
                     <CardHeader><CardTitle className="font-headline">Appearance</CardTitle></CardHeader>

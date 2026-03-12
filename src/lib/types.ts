@@ -5,6 +5,9 @@ export type Character = {
   name: string;
   age: number | null;
   sex: string | null;
+  race: string | null;
+  spouse: string | null;
+  vital_status: string | null;
   role: string | null;
   intro: string;
   appearance: {

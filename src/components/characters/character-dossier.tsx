@@ -24,7 +24,7 @@ import type { Character } from '@/lib/types';
 import Image from 'next/image';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Cake, BookOpen, Bot, FileText, Loader2, Pencil, Sparkles, Trash2, User } from 'lucide-react';
+import { Cake, BookOpen, Bot, FileText, Loader2, Pencil, Sparkles, Trash2, User, Heart, Users, Pulse } from 'lucide-react';
 import Link from 'next/link';
 import { deleteCharacter } from '@/app/characters/actions';
 import { useToast } from '@/hooks/use-toast';
@@ -86,6 +86,9 @@ export default function CharacterDossier({
                 <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                   <InfoItem icon={User} label="Sex" value={character.sex} />
                   <InfoItem icon={Cake} label="Age" value={character.age?.toString()} />
+                  <InfoItem icon={Users} label="Race" value={character.race} />
+                  <InfoItem icon={Heart} label="Spouse" value={character.spouse} />
+                  <InfoItem icon={Pulse} label="Vital Status" value={character.vital_status} />
                   <InfoItem icon={Bot} label="Role" value={character.role} />
                 </div>
 

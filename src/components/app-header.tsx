@@ -22,7 +22,7 @@ export default function AppHeader({ user }: { user: User | null }) {
       <div className="container flex h-14 max-w-screen-2xl items-center">
         <Link href="/characters" className="mr-6 flex items-center space-x-2">
           <Wand2 className="h-6 w-6 text-primary" />
-          <span className="font-headline text-lg font-bold">Arcane Dossier</span>
+          <span className="font-headline text-lg font-bold">Writer Akashic</span>
         </Link>
         <div className="flex flex-1 items-center justify-end space-x-2">
           {user && (
