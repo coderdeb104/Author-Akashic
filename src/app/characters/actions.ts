@@ -7,9 +7,9 @@ import { z } from 'zod'
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
-  intro: z.string().max(100).refine(s => s.trim() === '' || s.trim().split(/\s+/).length <= 5, {
+  intro: z.string().max(100).refine(s => s.trim().split(/\s+/).length <= 5, {
     message: 'Introduction must be 5 words or less.',
-  }),
+  }).optional().nullable(),
   age: z.coerce.number().positive().optional().nullable(),
   sex: z.string().optional().nullable(),
   role: z.string().optional().nullable(),
@@ -34,18 +34,18 @@ export async function saveCharacter(characterId: string | null, formData: FormDa
 
   const values = {
     name: formData.get('name'),
-    intro: formData.get('intro'),
-    age: formData.get('age') ? Number(formData.get('age')) : null,
-    sex: formData.get('sex'),
-    role: formData.get('role'),
-    description: formData.get('description'),
-    trivia: formData.get('trivia'),
-    image_url: formData.get('image_url'),
+    intro: formData.get('intro') || null,
+    age: formData.get('age') && formData.get('age') !== '0' ? Number(formData.get('age')) : null,
+    sex: formData.get('sex') || null,
+    role: formData.get('role') || null,
+    description: formData.get('description') || null,
+    trivia: formData.get('trivia') || null,
+    image_url: formData.get('image_url') || null,
     appearance: {
-        height: formData.get('appearance.height'),
-        hair: formData.get('appearance.hair'),
-        eyes: formData.get('appearance.eyes'),
-        distinguishing_features: formData.get('appearance.distinguishing_features'),
+        height: formData.get('appearance.height') || null,
+        hair: formData.get('appearance.hair') || null,
+        eyes: formData.get('appearance.eyes') || null,
+        distinguishing_features: formData.get('appearance.distinguishing_features') || null,
     },
   };
 
@@ -101,6 +101,7 @@ export async function uploadImage(formData: FormData) {
     .upload(filePath, file);
 
   if (error) {
+    console.error('Upload error:', error)
     return { error: `Upload failed: ${error.message}` };
   }
   

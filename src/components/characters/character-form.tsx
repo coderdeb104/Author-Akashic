@@ -28,7 +28,10 @@ const formSchema = z.object({
     intro: z.string().max(100, "Too long.").refine(s => s.trim() === '' || s.trim().split(/\s+/).length <= 5, {
       message: 'Introduction must be 5 words or less.',
     }).optional().nullable(),
-    age: z.coerce.number().positive().optional().nullable(),
+    age: z.preprocess(
+      (val) => (val === "" ? undefined : val),
+      z.coerce.number({invalid_type_error: "Age must be a number."}).positive("Age must be positive.").optional().nullable()
+    ),
     sex: z.string().optional().nullable(),
     role: z.string().optional().nullable(),
     appearance: z.object({
@@ -39,7 +42,7 @@ const formSchema = z.object({
     }),
     description: z.string().optional().nullable(),
     trivia: z.string().optional().nullable(),
-    image_url: z.string().url().optional().nullable(),
+    image_url: z.string().url("Must be a valid URL.").or(z.literal('')).optional().nullable(),
 });
 
 type CharacterFormData = z.infer<typeof formSchema>;
@@ -74,7 +77,7 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
         
         Object.entries(values).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
-              if (key === 'appearance' && typeof value === 'object') {
+              if (key === 'appearance' && typeof value === 'object' && value) {
                 Object.entries(value).forEach(([subKey, subValue]) => {
                   if (subValue) formData.append(`appearance.${subKey}`, subValue);
                 });
