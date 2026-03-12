@@ -71,7 +71,6 @@ export async function saveCharacter(characterId: string | null, formData: FormDa
   }
 
   if (result.error) {
-    console.error('Supabase error:', result.error)
     return { error: result.error.message }
   }
 
@@ -92,18 +91,21 @@ export async function uploadImage(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: 'Unauthorized' };
+    console.error('Upload error: User is not authenticated.');
+    return { error: 'Unauthorized. You must be logged in to upload an image.' };
   }
 
   const filePath = `${user.id}/${Date.now()}-${file.name}`;
+
+  console.log(`Uploading file for user ${user.id} to path: ${filePath}`);
 
   const { data, error } = await supabase.storage
     .from('character-images')
     .upload(filePath, file);
 
   if (error) {
-    console.error('Image upload error:', error);
-    return { error: error.message };
+    console.error('Supabase storage upload error:', JSON.stringify(error, null, 2));
+    return { error: `Upload failed: ${error.message}` };
   }
   
   const { data: { publicUrl } } = supabase.storage

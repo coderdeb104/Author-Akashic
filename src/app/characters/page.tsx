@@ -21,7 +21,6 @@ export default async function CharactersPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching characters:', error);
     return (
       <div className="container mx-auto">
         <div className="flex h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-destructive bg-card/20 p-12 text-center">
@@ -38,6 +37,7 @@ export default async function CharactersPage() {
               <li>Enabled Row Level Security (RLS) on the table.</li>
               <li>Created RLS policies that allow authenticated users to read their own data.</li>
             </ol>
+            <p className='mt-2 text-xs'>Error: {error.message}</p>
           </div>
         </div>
       </div>
