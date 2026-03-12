@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login`);
+  // For email confirmation, redirect to login with a message
+  const loginUrl = new URL(`${origin}/login`);
+  loginUrl.searchParams.set('message', 'Your email has been confirmed. You can now log in.');
+  return NextResponse.redirect(loginUrl);
 }

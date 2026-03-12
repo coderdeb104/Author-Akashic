@@ -24,7 +24,7 @@ export async function signup(prevState: any, formData: FormData) {
 
   const { email, password } = validatedFields.data
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
   })
@@ -32,6 +32,13 @@ export async function signup(prevState: any, formData: FormData) {
   if (error) {
     return {
       message: error.message,
+    }
+  }
+  
+  if (data.user && !data.session) {
+    return {
+      message: 'Check your email for a confirmation link to complete your signup.',
+      success: true,
     }
   }
 

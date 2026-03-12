@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useEffect, useActionState } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2, Wand2 } from 'lucide-react'
+import { Loader2, Wand2, MailCheck } from 'lucide-react'
 
 type Mode = 'login' | 'signup'
 
@@ -20,13 +20,41 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   useEffect(() => {
     if (state?.message) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication Error',
-        description: state.message,
-      })
+      if (state.success) {
+        toast({
+          title: 'Success',
+          description: state.message,
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Authentication Error',
+          description: state.message,
+        })
+      }
     }
   }, [state, toast])
+
+  if (mode === 'signup' && state?.success) {
+      return (
+          <Card>
+              <CardHeader className="text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                      <MailCheck className="h-6 w-6 text-primary" />
+                  </div>
+                   <CardTitle className="mt-4 font-headline text-2xl">Check your email</CardTitle>
+                   <CardDescription>
+                       We've sent a confirmation link to your email address. Please click the link to complete your registration.
+                   </CardDescription>
+              </CardHeader>
+              <CardFooter>
+                  <Button asChild className="w-full" variant="outline">
+                      <Link href="/login">Back to Login</Link>
+                  </Button>
+              </CardFooter>
+          </Card>
+      )
+  }
 
   return (
     <Card className="w-full">
