@@ -111,3 +111,52 @@ export async function uploadImage(formData: FormData) {
 
   return { url: publicUrl };
 }
+
+export async function deleteCharacter(characterId: string) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'You must be logged in to delete a character.' };
+  }
+
+  // First, get the character to find the image URL
+  const { data: character, error: fetchError } = await supabase
+    .from('characters')
+    .select('image_url')
+    .eq('id', characterId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (fetchError) {
+    return { error: 'Could not find character to delete.' };
+  }
+
+  // If there's an image, delete it from storage
+  if (character.image_url) {
+    const url = new URL(character.image_url);
+    const imagePath = url.pathname.split('/character-images/')[1];
+    if (imagePath) {
+      const { error: storageError } = await supabase.storage
+        .from('character-images')
+        .remove([imagePath]);
+      if (storageError) {
+        console.error('Error deleting image from storage:', storageError.message);
+        // We can choose to continue even if image deletion fails
+      }
+    }
+  }
+  
+  // Then, delete the character record
+  const { error: deleteError } = await supabase
+    .from('characters')
+    .delete()
+    .eq('id', characterId);
+
+  if (deleteError) {
+    return { error: deleteError.message };
+  }
+
+  revalidatePath('/characters');
+  redirect('/characters');
+}

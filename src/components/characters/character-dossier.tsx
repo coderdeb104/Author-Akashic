@@ -1,17 +1,34 @@
 "use client";
 
+import { useState, useTransition } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import type { Character } from '@/lib/types';
 import Image from 'next/image';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Users, Cake, VenetianMask, FileText, Sparkles, BookOpen, User, Bot } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Cake, BookOpen, Bot, FileText, Loader2, Pencil, Sparkles, Trash2, User } from 'lucide-react';
+import Link from 'next/link';
+import { deleteCharacter } from '@/app/characters/actions';
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function CharacterDossier({
   character,
@@ -22,6 +39,28 @@ export default function CharacterDossier({
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }) {
+  const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      const result = await deleteCharacter(character.id);
+      if (result?.error) {
+        toast({
+            variant: 'destructive',
+            title: 'Deletion Failed',
+            description: result.error,
+        });
+      } else {
+        toast({
+            title: 'Character Deleted',
+            description: `${character.name} has been removed from your dossier.`,
+        });
+        onOpenChange(false);
+      }
+    });
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0 border-primary/50 shadow-lg shadow-primary/20">
@@ -37,13 +76,13 @@ export default function CharacterDossier({
               />
                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent md:bg-gradient-to-r" />
             </div>
-            <div className="col-span-1 p-6 md:col-span-2">
+            <div className="col-span-1 flex flex-col p-6 md:col-span-2">
               <DialogHeader>
                 <DialogTitle className="font-headline text-4xl text-primary">{character.name}</DialogTitle>
                 <DialogDescription className="text-lg text-muted-foreground">{character.intro}</DialogDescription>
               </DialogHeader>
 
-              <div className="mt-6 space-y-6">
+              <div className="mt-6 flex-1 space-y-6">
                 <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                   <InfoItem icon={User} label="Sex" value={character.sex} />
                   <InfoItem icon={Cake} label="Age" value={character.age?.toString()} />
@@ -71,6 +110,37 @@ export default function CharacterDossier({
                   </Section>
                 )}
               </div>
+              <DialogFooter className="pt-6">
+                  <Button asChild variant="outline">
+                      <Link href={`/characters/${character.id}/edit`}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit
+                      </Link>
+                  </Button>
+                  <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                          <Button variant="destructive">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                          </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete {character.name} and remove all associated data from our servers.
+                              </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleDelete} disabled={isPending}>
+                                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                  Continue
+                              </AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                  </AlertDialog>
+              </DialogFooter>
             </div>
           </div>
         </ScrollArea>
