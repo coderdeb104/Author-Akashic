@@ -16,7 +16,7 @@ export default async function EditCharacterPage({ params }: { params: { id: stri
 
   return (
     <div className="container mx-auto max-w-4xl">
-      <h1 className="font-headline text-4xl font-bold text-primary">Edit Character</h1>
+      <h1 className="font-headline text-3xl font-bold text-primary sm:text-4xl">Edit Character</h1>
       <p className="mt-2 text-muted-foreground">
         Refine the details of your character's dossier.
       </p>

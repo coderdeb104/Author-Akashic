@@ -76,10 +76,10 @@ export default function CharacterDossier({
               />
                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent md:bg-gradient-to-r" />
             </div>
-            <div className="col-span-1 flex flex-col p-6 md:col-span-2">
+            <div className="col-span-1 flex flex-col p-4 sm:p-6 md:col-span-2">
               <DialogHeader>
-                <DialogTitle className="font-headline text-4xl text-primary">{character.name}</DialogTitle>
-                <DialogDescription className="text-lg text-muted-foreground">{character.intro}</DialogDescription>
+                <DialogTitle className="font-headline text-3xl text-primary sm:text-4xl">{character.name}</DialogTitle>
+                <DialogDescription className="text-base text-muted-foreground sm:text-lg">{character.intro}</DialogDescription>
               </DialogHeader>
 
               <div className="mt-6 flex-1 space-y-6">
@@ -152,7 +152,7 @@ export default function CharacterDossier({
 function Section({ icon: Icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) {
     return (
         <div>
-            <h4 className="flex items-center font-headline text-xl font-semibold text-accent mb-2">
+            <h4 className="flex items-center font-headline text-lg font-semibold text-accent sm:text-xl mb-2">
                 <Icon className="mr-2 h-5 w-5 text-primary" />
                 {title}
             </h4>
