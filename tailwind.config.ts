@@ -8,13 +8,22 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        headline: ['Space Grotesk', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
+        'glow-green': '#39FF14',
+        'mystic-pink': '#FC7EFF',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
@@ -88,12 +97,17 @@ export default {
             height: '0',
           },
         },
+        'glow': {
+          '0%, 100%': { opacity: '0.7', 'box-shadow': '0 0 3px hsl(var(--primary)), 0 0 6px hsl(var(--primary)), 0 0 9px hsl(var(--primary))' },
+          '50%': { opacity: '1', 'box-shadow': '0 0 6px hsl(var(--primary)), 0 0 12px hsl(var(--primary)), 0 0 18px hsl(var(--primary))' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'glow': 'glow 2.5s ease-in-out infinite',
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
 } satisfies Config;
