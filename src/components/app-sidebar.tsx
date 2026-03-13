@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
-import { Menu, Users, MapPin, Shield, Calendar, QuoteIcon, Wand2, BookText, Lightbulb } from "lucide-react";
+import { Menu, Users, MapPin, Shield, Calendar, QuoteIcon, Wand2, BookText } from "lucide-react";
 
 const navItems = [
     { href: "/characters", icon: Users, label: "Characters" },
@@ -13,8 +13,7 @@ const navItems = [
     { href: "/family-names", icon: Shield, label: "Family Names" },
     { href: "/events", icon: Calendar, label: "Events" },
     { href: "/quotes", icon: QuoteIcon, label: "Quotes" },
-    { href: "/topics", icon: BookText, label: "Topics" },
-    { href: "/facts", icon: Lightbulb, label: "Facts" },
+    { href: "/worldbuild", icon: BookText, label: "Worldbuild" },
 ];
 
 function NavContent() {

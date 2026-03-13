@@ -55,19 +55,10 @@ export type Quote = {
     author: string | null;
 };
 
-export type WorldTopic = {
+export type Worldbuild = {
     id: string;
     user_id: string;
     created_at: string;
-    name: string;
-    description: string | null;
-};
-
-export type WorldFact = {
-    id: string;
-    user_id: string;
-    topic_id: string;
-    created_at: string;
-    summary: string;
-    details: string | null;
+    topic: string;
+    fact: string | null;
 };
