@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
-import { Menu, Users, MapPin, Shield, Calendar, QuoteIcon, Wand2 } from "lucide-react";
+import { Menu, Users, MapPin, Shield, Calendar, QuoteIcon, Wand2, BookText, Lightbulb } from "lucide-react";
 
 const navItems = [
     { href: "/characters", icon: Users, label: "Characters" },
@@ -13,6 +13,8 @@ const navItems = [
     { href: "/family-names", icon: Shield, label: "Family Names" },
     { href: "/events", icon: Calendar, label: "Events" },
     { href: "/quotes", icon: QuoteIcon, label: "Quotes" },
+    { href: "/topics", icon: BookText, label: "Topics" },
+    { href: "/facts", icon: Lightbulb, label: "Facts" },
 ];
 
 function NavContent() {
@@ -47,7 +49,7 @@ export default function AppSidebar({ isMobile = false }: { isMobile?: boolean })
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="pr-0">
-                    <SheetHeader className="text-left">
+                    <SheetHeader>
                         <SheetTitle className="sr-only">Main Menu</SheetTitle>
                     </SheetHeader>
                     <Link href="/characters" className="flex items-center space-x-2 px-4 mb-4">

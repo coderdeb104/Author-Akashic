@@ -54,3 +54,20 @@ export type Quote = {
     text: string;
     author: string | null;
 };
+
+export type WorldTopic = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    name: string;
+    description: string | null;
+};
+
+export type WorldFact = {
+    id: string;
+    user_id: string;
+    topic_id: string;
+    created_at: string;
+    summary: string;
+    details: string | null;
+};
