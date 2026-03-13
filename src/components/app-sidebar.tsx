@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -66,7 +65,7 @@ export default function AppSidebar({ isMobile = false }: { isMobile?: boolean })
     return (
         <div className="flex h-full flex-col py-4">
             <h2 className="relative px-4 font-headline text-lg font-semibold tracking-tight text-primary">
-                World Anvil
+                MY AKASHIC
             </h2>
             <div className="mt-4 flex-1">
                 <NavContent />
