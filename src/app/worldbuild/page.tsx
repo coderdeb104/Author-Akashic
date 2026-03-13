@@ -13,26 +13,34 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { deleteWorldbuild } from './actions';
+import { SearchBar } from '@/components/search-bar';
 
-export default async function WorldbuildPage() {
+export default async function WorldbuildPage({ searchParams }: { searchParams?: { q?: string } }) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
         redirect('/login');
     }
+    
+    const query = searchParams?.q;
 
-    const { data: worldbuilds } = await supabase
-        .from('worldbuild')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('topic', { ascending: true })
-        .order('created_at', { ascending: false });
+    const { data: worldbuilds } = query
+        ? await supabase.rpc('search_worldbuild', { search_term: query })
+        : await supabase
+            .from('worldbuild')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('topic', { ascending: true })
+            .order('created_at', { ascending: false });
 
     return (
         <>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="font-headline text-2xl font-bold text-primary sm:text-3xl">Worldbuild</h1>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <h1 className="font-headline text-2xl font-bold text-primary sm:text-3xl whitespace-nowrap">Worldbuild</h1>
+                <div className="w-full md:w-auto md:flex-1 md:flex md:justify-center">
+                    <SearchBar placeholder="Search worldbuild..." query={query} />
+                </div>
                 <Button asChild>
                     <Link href="/worldbuild/new">
                         <PlusCircle className="mr-2 h-4 w-4" />
@@ -78,7 +86,7 @@ export default async function WorldbuildPage() {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={3} className="h-24 text-center">
-                                    No worldbuild entries found.
+                                    {query ? `No entries found for "${query}".` : 'No worldbuild entries found.'}
                                 </TableCell>
                             </TableRow>
                         )}

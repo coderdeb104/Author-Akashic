@@ -5,9 +5,10 @@ import CharacterCard from '@/components/characters/character-card';
 import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { AlertCircle, PlusCircle } from 'lucide-react';
+import { AlertCircle, PlusCircle, SearchX } from 'lucide-react';
+import { SearchBar } from '@/components/search-bar';
 
-export default async function CharactersPage() {
+export default async function CharactersPage({ searchParams }: { searchParams?: { q?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -15,11 +16,15 @@ export default async function CharactersPage() {
     redirect('/login');
   }
 
-  const { data: characters, error } = await supabase
-    .from('characters')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const query = searchParams?.q;
+
+  const { data: characters, error } = query
+    ? await supabase.rpc('search_characters', { search_term: query })
+    : await supabase
+        .from('characters')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
   if (error) {
     return (
@@ -47,15 +52,34 @@ export default async function CharactersPage() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
-          <h1 className="font-headline text-2xl font-bold text-primary sm:text-3xl">Characters</h1>
-          <Button asChild>
-            <Link href="/characters/new">
-                <PlusCircle className="mr-0 h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">New Character</span>
-            </Link>
-          </Button>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <h1 className="font-headline text-2xl font-bold text-primary sm:text-3xl whitespace-nowrap">Characters</h1>
+        <div className="w-full md:w-auto md:flex-1 md:flex md:justify-center">
+          <SearchBar placeholder="Search characters..." query={query} />
+        </div>
+        <Button asChild>
+          <Link href="/characters/new">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            <span>New Character</span>
+          </Link>
+        </Button>
       </div>
+
+      {query && characters && characters.length === 0 && (
+        <div className="flex h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/20 p-12 text-center">
+            <SearchX className="h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 font-headline text-2xl font-bold tracking-tight">No Characters Found</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+                Your search for "{query}" did not return any results.
+            </p>
+            <Button asChild className="mt-4" variant="outline">
+                <Link href="/characters">
+                    Clear Search
+                </Link>
+            </Button>
+        </div>
+      )}
+
       {characters && characters.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {(characters as Character[]).map((character) => (
@@ -63,15 +87,17 @@ export default async function CharactersPage() {
           ))}
         </div>
       ) : (
-        <div className="flex h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/20 p-12 text-center">
-          <h3 className="font-headline text-2xl font-bold tracking-tight">Your Dossier is Empty</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Begin by chronicling your first character.</p>
-           <Button asChild className="mt-4">
-            <Link href="/characters/new">
-              Create New Character
-            </Link>
-          </Button>
-        </div>
+        !query && (
+            <div className="flex h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/20 p-12 text-center">
+                <h3 className="font-headline text-2xl font-bold tracking-tight">Your Dossier is Empty</h3>
+                <p className="mt-2 text-sm text-muted-foreground">Begin by chronicling your first character.</p>
+                <Button asChild className="mt-4">
+                    <Link href="/characters/new">
+                    Create New Character
+                    </Link>
+                </Button>
+            </div>
+        )
       )}
     </>
   );
