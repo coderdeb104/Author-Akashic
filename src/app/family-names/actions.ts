@@ -9,6 +9,8 @@ import { z } from 'zod'
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
   description: z.string().optional().nullable(),
+  family_head: z.string().optional().nullable(),
+  members: z.string().optional().nullable(),
 });
 
 export async function saveFamilyName(familyNameId: string | null, formData: FormData) {

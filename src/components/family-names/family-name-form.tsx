@@ -25,6 +25,8 @@ import { Loader2 } from 'lucide-react';
 const formSchema = z.object({
     name: z.string().min(1, 'Name is required.'),
     description: z.string().optional().nullable(),
+    family_head: z.string().optional().nullable(),
+    members: z.string().optional().nullable(),
 });
 
 type FamilyNameFormData = z.infer<typeof formSchema>;
@@ -38,6 +40,8 @@ export default function FamilyNameForm({ familyName }: { familyName?: FamilyName
         defaultValues: {
             name: familyName?.name ?? '',
             description: familyName?.description ?? '',
+            family_head: familyName?.family_head ?? '',
+            members: familyName?.members ?? '',
         },
     });
 
@@ -74,7 +78,9 @@ export default function FamilyNameForm({ familyName }: { familyName?: FamilyName
                     <CardHeader><CardTitle className="font-headline">Family Name Details</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g., House Stark" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                        <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe the family name..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="family_head" render={({ field }) => ( <FormItem><FormLabel>Family Head</FormLabel><FormControl><Input placeholder="e.g., Lord Eddard Stark" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe the family..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="members" render={({ field }) => ( <FormItem><FormLabel>Notable Members</FormLabel><FormControl><Textarea placeholder="List notable family members..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
                     </CardContent>
                 </Card>
 

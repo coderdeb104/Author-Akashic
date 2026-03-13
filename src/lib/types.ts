@@ -36,6 +36,8 @@ export type FamilyName = {
     created_at: string;
     name: string;
     description: string | null;
+    family_head: string | null;
+    members: string | null;
 };
 
 export type Event = {
@@ -61,4 +63,21 @@ export type Worldbuild = {
     created_at: string;
     topic: string;
     fact: string | null;
+};
+
+export type WorldTopic = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    name: string;
+    description: string | null;
+};
+
+export type WorldFact = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    topic_id: string;
+    summary: string;
+    details: string | null;
 };

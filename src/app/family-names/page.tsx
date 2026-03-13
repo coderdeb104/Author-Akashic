@@ -44,6 +44,7 @@ export default async function FamilyNamesPage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
+                            <TableHead>Family Head</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
@@ -53,6 +54,7 @@ export default async function FamilyNamesPage() {
                             (familyNames as FamilyName[]).map((familyName) => (
                                 <TableRow key={familyName.id}>
                                     <TableCell className="font-medium">{familyName.name}</TableCell>
+                                    <TableCell className="text-muted-foreground">{familyName.family_head}</TableCell>
                                     <TableCell className="text-muted-foreground truncate max-w-sm">{familyName.description}</TableCell>
                                     <TableCell>
                                          <DropdownMenu>
@@ -76,7 +78,7 @@ export default async function FamilyNamesPage() {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={3} className="h-24 text-center">
+                                <TableCell colSpan={4} className="h-24 text-center">
                                     No family names found.
                                 </TableCell>
                             </TableRow>
