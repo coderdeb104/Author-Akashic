@@ -21,12 +21,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const formSchema = z.object({
     name: z.string().min(1, 'Name is required.'),
     description: z.string().optional().nullable(),
     family_head: z.string().optional().nullable(),
     members: z.string().optional().nullable(),
+    status: z.string().optional().nullable(),
 });
 
 type FamilyNameFormData = z.infer<typeof formSchema>;
@@ -42,6 +44,7 @@ export default function FamilyNameForm({ familyName }: { familyName?: FamilyName
             description: familyName?.description ?? '',
             family_head: familyName?.family_head ?? '',
             members: familyName?.members ?? '',
+            status: familyName?.status ?? '',
         },
     });
 
@@ -77,8 +80,33 @@ export default function FamilyNameForm({ familyName }: { familyName?: FamilyName
                 <Card>
                     <CardHeader><CardTitle className="font-headline">Family Name Details</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g., House Stark" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                        <FormField control={form.control} name="family_head" render={({ field }) => ( <FormItem><FormLabel>Family Head</FormLabel><FormControl><Input placeholder="e.g., Lord Eddard Stark" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g., House Stark" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                            <FormField control={form.control} name="family_head" render={({ field }) => ( <FormItem><FormLabel>Family Head</FormLabel><FormControl><Input placeholder="e.g., Lord Eddard Stark" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                        </div>
+                        <FormField
+                            control={form.control}
+                            name="status"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Status</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                    <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="Active">Active</SelectItem>
+                                    <SelectItem value="Inactive">Inactive</SelectItem>
+                                    <SelectItem value="Fallen">Fallen</SelectItem>
+                                    <SelectItem value="Other">Other</SelectItem>
+                                </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
                         <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe the family..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
                         <FormField control={form.control} name="members" render={({ field }) => ( <FormItem><FormLabel>Notable Members</FormLabel><FormControl><Textarea placeholder="List notable family members..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
                     </CardContent>

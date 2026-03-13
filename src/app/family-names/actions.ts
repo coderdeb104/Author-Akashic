@@ -11,6 +11,7 @@ const formSchema = z.object({
   description: z.string().optional().nullable(),
   family_head: z.string().optional().nullable(),
   members: z.string().optional().nullable(),
+  status: z.string().optional().nullable(),
 });
 
 export async function saveFamilyName(familyNameId: string | null, formData: FormData) {

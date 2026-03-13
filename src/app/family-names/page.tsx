@@ -14,8 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { deleteFamilyName } from './actions';
 import { SearchBar } from '@/components/search-bar';
+import { FamilyNameFilters } from '@/components/family-names/family-name-filters';
 
-export default async function FamilyNamesPage({ searchParams }: { searchParams?: { q?: string } }) {
+export default async function FamilyNamesPage({ searchParams }: { 
+    searchParams?: { 
+        q?: string;
+        status?: string;
+    } 
+}) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -24,14 +30,37 @@ export default async function FamilyNamesPage({ searchParams }: { searchParams?:
     }
     
     const query = searchParams?.q;
+    const statusFilter = searchParams?.status;
 
-    const { data: familyNames } = query
-        ? await supabase.rpc('search_family_names', { search_term: query })
-        : await supabase
+    const { data: statusData } = await supabase
+        .from('family_names')
+        .select('status')
+        .eq('user_id', user.id);
+    const uniqueStatuses = Array.from(new Set(statusData?.map(item => item.status).filter(Boolean) as string[])).sort();
+
+    let familyNames;
+    if (query) {
+        let { data } = await supabase.rpc('search_family_names', { search_term: query });
+        if (statusFilter && data) {
+            familyNames = data.filter((fn: FamilyName) => fn.status === statusFilter);
+        } else {
+            familyNames = data;
+        }
+    } else {
+        let queryBuilder = supabase
             .from('family_names')
             .select('*')
-            .eq('user_id', user.id)
-            .order('name', { ascending: true });
+            .eq('user_id', user.id);
+        
+        if (statusFilter) {
+            queryBuilder = queryBuilder.eq('status', statusFilter);
+        }
+
+        const { data } = await queryBuilder.order('name', { ascending: true });
+        familyNames = data;
+    }
+
+    const hasActiveFilters = !!statusFilter;
 
     return (
         <>
@@ -47,12 +76,19 @@ export default async function FamilyNamesPage({ searchParams }: { searchParams?:
                     </Link>
                 </Button>
             </div>
+            
+            <FamilyNameFilters
+                statuses={uniqueStatuses}
+                currentFilters={{ status: statusFilter }}
+            />
+
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
                             <TableHead>Family Head</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
@@ -63,6 +99,7 @@ export default async function FamilyNamesPage({ searchParams }: { searchParams?:
                                 <TableRow key={familyName.id}>
                                     <TableCell className="font-medium">{familyName.name}</TableCell>
                                     <TableCell className="text-muted-foreground">{familyName.family_head}</TableCell>
+                                    <TableCell className="text-muted-foreground">{familyName.status}</TableCell>
                                     <TableCell className="text-muted-foreground truncate max-w-sm">{familyName.description}</TableCell>
                                     <TableCell>
                                          <DropdownMenu>
@@ -86,8 +123,8 @@ export default async function FamilyNamesPage({ searchParams }: { searchParams?:
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center">
-                                    {query ? `No family names found for "${query}".` : 'No family names found.'}
+                                <TableCell colSpan={5} className="h-24 text-center">
+                                    {query || hasActiveFilters ? `No family names found.` : 'No family names found.'}
                                 </TableCell>
                             </TableRow>
                         )}

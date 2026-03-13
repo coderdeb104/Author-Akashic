@@ -38,6 +38,7 @@ export type FamilyName = {
     description: string | null;
     family_head: string | null;
     members: string | null;
+    status: string | null;
 };
 
 export type Event = {

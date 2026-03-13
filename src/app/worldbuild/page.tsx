@@ -14,8 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { deleteWorldbuild } from './actions';
 import { SearchBar } from '@/components/search-bar';
+import { WorldbuildFilters } from '@/components/worldbuild/worldbuild-filters';
 
-export default async function WorldbuildPage({ searchParams }: { searchParams?: { q?: string } }) {
+export default async function WorldbuildPage({ searchParams }: { 
+    searchParams?: { 
+        q?: string;
+        topic?: string;
+    } 
+}) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -24,15 +30,39 @@ export default async function WorldbuildPage({ searchParams }: { searchParams?: 
     }
     
     const query = searchParams?.q;
+    const topicFilter = searchParams?.topic;
 
-    const { data: worldbuilds } = query
-        ? await supabase.rpc('search_worldbuild', { search_term: query })
-        : await supabase
+    const { data: topicData } = await supabase
+        .from('worldbuild')
+        .select('topic')
+        .eq('user_id', user.id);
+    const uniqueTopics = Array.from(new Set(topicData?.map(item => item.topic).filter(Boolean) as string[])).sort();
+
+    let worldbuilds;
+    if (query) {
+        let { data } = await supabase.rpc('search_worldbuild', { search_term: query });
+        if (topicFilter && data) {
+            worldbuilds = data.filter((entry: Worldbuild) => entry.topic === topicFilter);
+        } else {
+            worldbuilds = data;
+        }
+    } else {
+        let queryBuilder = supabase
             .from('worldbuild')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', user.id);
+        
+        if (topicFilter) {
+            queryBuilder = queryBuilder.eq('topic', topicFilter);
+        }
+        
+        const { data } = await queryBuilder
             .order('topic', { ascending: true })
             .order('created_at', { ascending: false });
+        worldbuilds = data;
+    }
+
+    const hasActiveFilters = !!topicFilter;
 
     return (
         <>
@@ -48,6 +78,12 @@ export default async function WorldbuildPage({ searchParams }: { searchParams?: 
                     </Link>
                 </Button>
             </div>
+            
+            <WorldbuildFilters
+                topics={uniqueTopics}
+                currentFilters={{ topic: topicFilter }}
+            />
+
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
@@ -86,7 +122,7 @@ export default async function WorldbuildPage({ searchParams }: { searchParams?: 
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={3} className="h-24 text-center">
-                                    {query ? `No entries found for "${query}".` : 'No worldbuild entries found.'}
+                                    {query || hasActiveFilters ? `No entries found.` : 'No worldbuild entries found.'}
                                 </TableCell>
                             </TableRow>
                         )}
