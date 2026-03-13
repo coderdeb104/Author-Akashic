@@ -28,6 +28,7 @@ export type Place = {
     created_at: string;
     name: string;
     description: string | null;
+    area: string | null;
 };
 
 export type FamilyName = {
@@ -55,7 +56,7 @@ export type Quote = {
     user_id: string;
     created_at: string;
     text: string;
-    author: string | null;
+    speaker: string | null;
 };
 
 export type Worldbuild = {

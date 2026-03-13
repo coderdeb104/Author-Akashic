@@ -24,7 +24,7 @@ import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
     text: z.string().min(1, 'Quote text is required.'),
-    author: z.string().optional().nullable(),
+    speaker: z.string().optional().nullable(),
 });
 
 type QuoteFormData = z.infer<typeof formSchema>;
@@ -37,7 +37,7 @@ export default function QuoteForm({ quote }: { quote?: Quote | null }) {
         resolver: zodResolver(formSchema),
         defaultValues: {
             text: quote?.text ?? '',
-            author: quote?.author ?? '',
+            speaker: quote?.speaker ?? '',
         },
     });
 
@@ -74,7 +74,7 @@ export default function QuoteForm({ quote }: { quote?: Quote | null }) {
                     <CardHeader><CardTitle className="font-headline">Quote Details</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <FormField control={form.control} name="text" render={({ field }) => ( <FormItem><FormLabel>Quote</FormLabel><FormControl><Textarea placeholder="e.g., 'Winter is coming.'" className="min-h-24" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
-                        <FormField control={form.control} name="author" render={({ field }) => ( <FormItem><FormLabel>Author</FormLabel><FormControl><Input placeholder="e.g., Eddard Stark" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="speaker" render={({ field }) => ( <FormItem><FormLabel>Speaker</FormLabel><FormControl><Input placeholder="e.g., Eddard Stark" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
                     </CardContent>
                 </Card>
 

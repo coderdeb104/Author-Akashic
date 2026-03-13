@@ -14,8 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { deletePlace } from './actions';
 import { SearchBar } from '@/components/search-bar';
+import { PlaceFilters } from '@/components/places/place-filters';
 
-export default async function PlacesPage({ searchParams }: { searchParams?: { q?: string } }) {
+export default async function PlacesPage({ searchParams }: { 
+    searchParams?: { 
+        q?: string;
+        area?: string;
+    } 
+}) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -24,14 +30,37 @@ export default async function PlacesPage({ searchParams }: { searchParams?: { q?
     }
 
     const query = searchParams?.q;
+    const areaFilter = searchParams?.area;
 
-    const { data: places } = query
-        ? await supabase.rpc('search_places', { search_term: query })
-        : await supabase
+    const { data: areaData } = await supabase
+        .from('places')
+        .select('area')
+        .eq('user_id', user.id);
+    const uniqueAreas = Array.from(new Set(areaData?.map(item => item.area).filter(Boolean) as string[])).sort();
+
+    let places;
+    if (query) {
+        let { data } = await supabase.rpc('search_places', { search_term: query });
+        if (areaFilter && data) {
+            places = data.filter((p: Place) => p.area === areaFilter);
+        } else {
+            places = data;
+        }
+    } else {
+        let queryBuilder = supabase
             .from('places')
             .select('*')
-            .eq('user_id', user.id)
-            .order('name', { ascending: true });
+            .eq('user_id', user.id);
+        
+        if (areaFilter) {
+            queryBuilder = queryBuilder.eq('area', areaFilter);
+        }
+        
+        const { data } = await queryBuilder.order('name', { ascending: true });
+        places = data;
+    }
+
+    const hasActiveFilters = !!areaFilter;
 
     return (
         <>
@@ -47,11 +76,18 @@ export default async function PlacesPage({ searchParams }: { searchParams?: { q?
                     </Link>
                 </Button>
             </div>
+
+            <PlaceFilters
+                areas={uniqueAreas}
+                currentFilters={{ area: areaFilter }}
+            />
+
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
+                            <TableHead>Area</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
@@ -61,6 +97,7 @@ export default async function PlacesPage({ searchParams }: { searchParams?: { q?
                             (places as Place[]).map((place) => (
                                 <TableRow key={place.id}>
                                     <TableCell className="font-medium">{place.name}</TableCell>
+                                    <TableCell className="text-muted-foreground">{place.area}</TableCell>
                                     <TableCell className="text-muted-foreground truncate max-w-sm">{place.description}</TableCell>
                                     <TableCell>
                                          <DropdownMenu>
@@ -84,8 +121,8 @@ export default async function PlacesPage({ searchParams }: { searchParams?: { q?
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={3} className="h-24 text-center">
-                                    {query ? `No places found for "${query}".` : 'No places found. Add your first one!'}
+                                <TableCell colSpan={4} className="h-24 text-center">
+                                    {query || hasActiveFilters ? `No places found.` : 'No places found. Add your first one!'}
                                 </TableCell>
                             </TableRow>
                         )}

@@ -14,8 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { deleteQuote } from './actions';
 import { SearchBar } from '@/components/search-bar';
+import { QuoteFilters } from '@/components/quotes/quote-filters';
 
-export default async function QuotesPage({ searchParams }: { searchParams?: { q?: string } }) {
+export default async function QuotesPage({ searchParams }: { 
+    searchParams?: { 
+        q?: string;
+        speaker?: string;
+    } 
+}) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -24,14 +30,37 @@ export default async function QuotesPage({ searchParams }: { searchParams?: { q?
     }
 
     const query = searchParams?.q;
+    const speakerFilter = searchParams?.speaker;
 
-    const { data: quotes } = query
-        ? await supabase.rpc('search_quotes', { search_term: query })
-        : await supabase
+    const { data: speakerData } = await supabase
+        .from('quotes')
+        .select('speaker')
+        .eq('user_id', user.id);
+    const uniqueSpeakers = Array.from(new Set(speakerData?.map(item => item.speaker).filter(Boolean) as string[])).sort();
+
+    let quotes;
+    if (query) {
+        let { data } = await supabase.rpc('search_quotes', { search_term: query });
+        if (speakerFilter && data) {
+            quotes = data.filter((q: Quote) => q.speaker === speakerFilter);
+        } else {
+            quotes = data;
+        }
+    } else {
+        let queryBuilder = supabase
             .from('quotes')
             .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
+            .eq('user_id', user.id);
+
+        if (speakerFilter) {
+            queryBuilder = queryBuilder.eq('speaker', speakerFilter);
+        }
+
+        const { data } = await queryBuilder.order('created_at', { ascending: false });
+        quotes = data;
+    }
+
+    const hasActiveFilters = !!speakerFilter;
 
     return (
         <>
@@ -47,12 +76,18 @@ export default async function QuotesPage({ searchParams }: { searchParams?: { q?
                     </Link>
                 </Button>
             </div>
+
+            <QuoteFilters
+                speakers={uniqueSpeakers}
+                currentFilters={{ speaker: speakerFilter }}
+            />
+
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Quote</TableHead>
-                            <TableHead>Author</TableHead>
+                            <TableHead>Speaker</TableHead>
                             <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -61,7 +96,7 @@ export default async function QuotesPage({ searchParams }: { searchParams?: { q?
                             (quotes as Quote[]).map((quote) => (
                                 <TableRow key={quote.id}>
                                     <TableCell className="font-medium whitespace-pre-wrap">"{quote.text}"</TableCell>
-                                    <TableCell className="text-muted-foreground">{quote.author}</TableCell>
+                                    <TableCell className="text-muted-foreground">{quote.speaker}</TableCell>
                                     <TableCell>
                                          <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -85,7 +120,7 @@ export default async function QuotesPage({ searchParams }: { searchParams?: { q?
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={3} className="h-24 text-center">
-                                    {query ? `No quotes found for "${query}".` : 'No quotes found.'}
+                                    {query || hasActiveFilters ? `No quotes found.` : 'No quotes found.'}
                                 </TableCell>
                             </TableRow>
                         )}

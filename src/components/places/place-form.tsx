@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,6 +25,7 @@ import { Loader2 } from 'lucide-react';
 const formSchema = z.object({
     name: z.string().min(1, 'Name is required.'),
     description: z.string().optional().nullable(),
+    area: z.string().optional().nullable(),
 });
 
 type PlaceFormData = z.infer<typeof formSchema>;
@@ -39,6 +39,7 @@ export default function PlaceForm({ place }: { place?: Place | null }) {
         defaultValues: {
             name: place?.name ?? '',
             description: place?.description ?? '',
+            area: place?.area ?? '',
         },
     });
 
@@ -75,6 +76,7 @@ export default function PlaceForm({ place }: { place?: Place | null }) {
                     <CardHeader><CardTitle className="font-headline">Place Details</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g., The Whispering Mountains" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="area" render={({ field }) => ( <FormItem><FormLabel>Area</FormLabel><FormControl><Input placeholder="e.g., Northern Kingdom" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
                         <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe the place..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
                     </CardContent>
                 </Card>

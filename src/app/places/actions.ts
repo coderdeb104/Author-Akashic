@@ -9,6 +9,7 @@ import { z } from 'zod'
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
   description: z.string().optional().nullable(),
+  area: z.string().optional().nullable(),
 });
 
 export async function savePlace(placeId: string | null, formData: FormData) {

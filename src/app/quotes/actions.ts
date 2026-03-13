@@ -8,7 +8,7 @@ import { z } from 'zod'
 
 const formSchema = z.object({
   text: z.string().min(1, 'Quote text is required.'),
-  author: z.string().optional().nullable(),
+  speaker: z.string().optional().nullable(),
 });
 
 export async function saveQuote(quoteId: string | null, formData: FormData) {
