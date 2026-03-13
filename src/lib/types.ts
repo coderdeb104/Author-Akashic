@@ -1,3 +1,4 @@
+
 export type Character = {
   id: string;
   user_id: string;
@@ -19,4 +20,37 @@ export type Character = {
   description: string | null;
   trivia: string | null;
   image_url: string | null;
+};
+
+export type Place = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    name: string;
+    description: string | null;
+};
+
+export type FamilyName = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    name: string;
+    description: string | null;
+};
+
+export type Event = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    title: string;
+    description: string | null;
+    event_date: string | null;
+};
+
+export type Quote = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    text: string;
+    author: string | null;
 };

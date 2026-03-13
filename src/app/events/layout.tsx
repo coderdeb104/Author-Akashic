@@ -4,7 +4,7 @@ import AppSidebar from '@/components/app-sidebar';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
-export default async function CharactersLayout({
+export default async function EventsLayout({
   children,
 }: {
   children: React.ReactNode;

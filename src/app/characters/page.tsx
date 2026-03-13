@@ -1,10 +1,11 @@
+
 import { createClient } from '@/lib/supabase/server';
 import type { Character } from '@/lib/types';
 import CharacterCard from '@/components/characters/character-card';
 import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, PlusCircle } from 'lucide-react';
 
 export default async function CharactersPage() {
   const supabase = createClient();
@@ -45,9 +46,18 @@ export default async function CharactersPage() {
   }
 
   return (
-    <div className="container mx-auto">
+    <>
+      <div className="flex items-center justify-between mb-6">
+          <h1 className="font-headline text-3xl font-bold text-primary">Characters</h1>
+          <Button asChild>
+              <Link href="/characters/new">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  New Character
+              </Link>
+          </Button>
+      </div>
       {characters && characters.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {(characters as Character[]).map((character) => (
             <CharacterCard key={character.id} character={character} />
           ))}
@@ -63,6 +73,6 @@ export default async function CharactersPage() {
           </Button>
         </div>
       )}
-    </div>
+    </>
   );
 }
