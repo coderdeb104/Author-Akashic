@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from 'react-hook-form';
@@ -146,7 +147,7 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
                                     <FormField control={form.control} name="sex" render={({ field }) => (
                                       <FormItem>
                                         <FormLabel>Sex</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
                                           <FormControl>
                                             <SelectTrigger>
                                               <SelectValue placeholder="Select sex" />
@@ -173,7 +174,24 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <FormField control={form.control} name="race" render={({ field }) => ( <FormItem><FormLabel>Race</FormLabel><FormControl><Input placeholder="e.g., Human, Elf" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
                         <FormField control={form.control} name="spouse" render={({ field }) => ( <FormItem><FormLabel>Spouse</FormLabel><FormControl><Input placeholder="e.g., 'Name' or 'None'" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
-                        <FormField control={form.control} name="vital_status" render={({ field }) => ( <FormItem><FormLabel>Vital Status</FormLabel><FormControl><Input placeholder="e.g., Alive, Deceased" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="vital_status" render={({ field }) => (
+                           <FormItem>
+                            <FormLabel>Vital Status</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="Alive">Alive</SelectItem>
+                                <SelectItem value="Dead">Dead</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
                         <FormField control={form.control} name="role" render={({ field }) => ( <FormItem><FormLabel>Role</FormLabel><FormControl><Input placeholder="e.g., Protagonist, Antagonist" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
                       </div>
                     </CardContent>

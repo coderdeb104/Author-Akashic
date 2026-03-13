@@ -7,8 +7,16 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { AlertCircle, PlusCircle, SearchX } from 'lucide-react';
 import { SearchBar } from '@/components/search-bar';
+import { CharacterFilters } from '@/components/characters/character-filters';
 
-export default async function CharactersPage({ searchParams }: { searchParams?: { q?: string } }) {
+export default async function CharactersPage({ searchParams }: { 
+  searchParams?: { 
+    q?: string;
+    race?: string;
+    sex?: string;
+    vital_status?: string;
+  } 
+}) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -17,15 +25,50 @@ export default async function CharactersPage({ searchParams }: { searchParams?: 
   }
 
   const query = searchParams?.q;
+  const raceFilter = searchParams?.race;
+  const sexFilter = searchParams?.sex;
+  const vitalStatusFilter = searchParams?.vital_status;
 
-  const { data: characters, error } = query
-    ? await supabase.rpc('search_characters', { search_term: query })
-    : await supabase
-        .from('characters')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+  // Fetch unique races for filter dropdown
+  const { data: raceData } = await supabase
+    .from('characters')
+    .select('race')
+    .eq('user_id', user.id);
+  const uniqueRaces = Array.from(new Set(raceData?.map(item => item.race).filter(Boolean) as string[])).sort();
 
+  let characters, error;
+
+  if (query) {
+    const { data, error: rpcError } = await supabase.rpc('search_characters', { search_term: query });
+    characters = data;
+    error = rpcError;
+  } else {
+    let queryBuilder = supabase
+      .from('characters')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (raceFilter) queryBuilder = queryBuilder.eq('race', raceFilter);
+    if (sexFilter) queryBuilder = queryBuilder.eq('sex', sexFilter);
+    if (vitalStatusFilter) queryBuilder = queryBuilder.eq('vital_status', vitalStatusFilter);
+
+    const { data: queryData, error: queryError } = await queryBuilder.order('created_at', { ascending: false });
+    characters = queryData;
+    error = queryError;
+  }
+  
+  if (!query && characters) {
+    if (raceFilter) {
+      characters = characters.filter((c: Character) => c.race === raceFilter);
+    }
+    if (sexFilter) {
+      characters = characters.filter((c: Character) => c.sex === sexFilter);
+    }
+    if (vitalStatusFilter) {
+      characters = characters.filter((c: Character) => c.vital_status === vitalStatusFilter);
+    }
+  }
+  
   if (error) {
     return (
       <div className="container mx-auto">
@@ -50,6 +93,8 @@ export default async function CharactersPage({ searchParams }: { searchParams?: 
     );
   }
 
+  const hasActiveFilters = raceFilter || sexFilter || vitalStatusFilter;
+
   return (
     <>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -65,16 +110,21 @@ export default async function CharactersPage({ searchParams }: { searchParams?: 
         </Button>
       </div>
 
-      {query && characters && characters.length === 0 && (
+      <CharacterFilters 
+        races={uniqueRaces}
+        currentFilters={{ race: raceFilter, sex: sexFilter, vital_status: vitalStatusFilter }} 
+      />
+
+      {(query || hasActiveFilters) && characters && characters.length === 0 && (
         <div className="flex h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/20 p-12 text-center">
             <SearchX className="h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 font-headline text-2xl font-bold tracking-tight">No Characters Found</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-                Your search for "{query}" did not return any results.
+                Your search or filter criteria did not return any results.
             </p>
             <Button asChild className="mt-4" variant="outline">
                 <Link href="/characters">
-                    Clear Search
+                    Clear Search & Filters
                 </Link>
             </Button>
         </div>
@@ -87,7 +137,7 @@ export default async function CharactersPage({ searchParams }: { searchParams?: 
           ))}
         </div>
       ) : (
-        !query && (
+        !query && !hasActiveFilters && (
             <div className="flex h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/20 p-12 text-center">
                 <h3 className="font-headline text-2xl font-bold tracking-tight">Your Dossier is Empty</h3>
                 <p className="mt-2 text-sm text-muted-foreground">Begin by chronicling your first character.</p>
