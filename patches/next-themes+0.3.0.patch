@@ -1,0 +1,15 @@
+diff --git a/node_modules/next-themes/package.json b/node_modules/next-themes/package.json
+index 5855f72..9a54a24 100644
+--- a/node_modules/next-themes/package.json
++++ b/node_modules/next-themes/package.json
+@@ -37,8 +37,8 @@
+     "access": "public"
+   },
+   "peerDependencies": {
+-    "react": "^16.8 || ^17 || ^18",
+-    "react-dom": "^16.8 || ^17 || ^18"
++    "react": "^16.8 || ^17 || ^18 || ^19",
++    "react-dom": "^16.8 || ^17 || ^18 || ^19"
+   },
+   "devDependencies": {
+     "@testing-library/jest-dom": "^5.16.2",

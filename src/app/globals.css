@@ -4,39 +4,38 @@
 
 @layer base {
   :root {
-    --background: 220 13% 2%;
-    --foreground: 210 40% 98%;
-
-    --card: 220 13% 8%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 220 13% 2%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 280 90% 70%; /* Purple */
-    --primary-foreground: 280 90% 98%;
-
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 280 50% 40%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 63% 31%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+ 
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 280 20% 30%;
-    --input: 280 20% 30%;
-    --ring: 280 90% 70%;
-
+ 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+ 
     --radius: 0.25rem;
   }
-
+ 
   .dark {
-    /* Same as root for dark-by-default */
     --background: 220 13% 2%;
     --foreground: 210 40% 98%;
 

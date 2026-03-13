@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { LogOut, Wand2 } from "lucide-react";
 import AppSidebar from "./app-sidebar";
+import { ThemeToggle } from "./theme-toggle";
 
 export default function AppHeader({ user }: { user: User | null }) {
   const router = useRouter();
@@ -34,6 +35,7 @@ export default function AppHeader({ user }: { user: User | null }) {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-2">
+          <ThemeToggle />
           {user && (
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
