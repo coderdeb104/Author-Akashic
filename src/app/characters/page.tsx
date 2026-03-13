@@ -48,7 +48,7 @@ export default async function CharactersPage() {
   return (
     <>
       <div className="flex items-center justify-between mb-6">
-          <h1 className="font-headline text-3xl font-bold text-primary">Characters</h1>
+          <h1 className="font-headline text-2xl font-bold text-primary sm:text-3xl">Characters</h1>
           <Button asChild>
               <Link href="/characters/new">
                   <PlusCircle className="mr-2 h-4 w-4" />
