@@ -22,7 +22,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <ThemeProvider
-          defaultTheme="system"
+          defaultTheme="dark"
           storageKey="writer-akashic-theme"
         >
           {children}
