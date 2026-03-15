@@ -114,8 +114,7 @@ export async function deleteFiction(fictionId: string) {
   // If there's an image, delete it from storage
   if (fiction.image_url) {
     const url = new URL(fiction.image_url);
-    const pathSegments = url.pathname.split('/');
-    const imagePath = pathSegments.slice(pathSegments.indexOf('fiction-images') + 1).join('/');
+    const imagePath = url.pathname.split('/fiction-images/')[1];
 
     if (imagePath) {
       const { error: storageError } = await supabase.storage
