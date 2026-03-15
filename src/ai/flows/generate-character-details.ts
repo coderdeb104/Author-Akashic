@@ -24,13 +24,6 @@ const GenerateCharacterDetailOutputSchema = z.object({
 });
 export type GenerateCharacterDetailOutput = z.infer<typeof GenerateCharacterDetailOutputSchema>;
 
-
-export async function generateCharacterDetail(input: GenerateCharacterDetailInput): Promise<GenerateCharacterDetailOutput> {
-  const { output } = await characterDetailFlow(input);
-  return output!;
-}
-
-
 const prompt = ai.definePrompt({
   name: 'characterDetailPrompt',
   input: { schema: GenerateCharacterDetailInputSchema },
@@ -65,3 +58,7 @@ const characterDetailFlow = ai.defineFlow(
     return output!;
   }
 );
+
+export async function generateCharacterDetail(input: GenerateCharacterDetailInput): Promise<GenerateCharacterDetailOutput> {
+  return characterDetailFlow(input);
+}
