@@ -23,9 +23,11 @@ Supabase needs to know the URL of your live application to handle authentication
     -   `http://localhost:9002/**` (or whatever port you use locally)
     -   For Vercel Previews, you can use wildcards: `https://*-your-project-slug.vercel.app/**`
 
-### 2. Configure Vercel
+### 2. Configure Vercel Environment Variables
 
-Your Vercel project needs credentials to connect to your Supabase backend.
+Your Vercel project needs credentials to connect to your Supabase backend and Google AI services.
+
+#### Supabase Keys
 
 **First, get your Supabase API keys:**
 
@@ -36,14 +38,30 @@ Your Vercel project needs credentials to connect to your Supabase backend.
 **Next, add them to Vercel as Environment Variables:**
 
 1.  Go to your project's dashboard on Vercel.
-2.  Click the **Settings** tab.
-3.  Click on **Environment Variables** from the side menu.
-4.  Create two new variables:
+2.  Click the **Settings** tab, then **Environment Variables**.
+3.  Create two new variables for Supabase:
     *   **Name:** `NEXT_PUBLIC_SUPABASE_URL`
     *   **Value:** Paste the `Project URL` from your Supabase API settings.
     *   **Name:** `NEXT_PUBLIC_SUPABASE_ANON_KEY`
     *   **Value:** Paste the `anon` `public` key from your Supabase API settings.
-5.  Ensure the variables are applied to all environments (Production, Preview, and Development).
-6.  Go to the **Deployments** tab and trigger a new deployment to apply the environment variables.
 
-After completing these steps, your Vercel deployment will be successfully connected to your Supabase project.
+#### Google AI (Gemini) API Key
+
+For the AI-powered features (like the character detail generator and tone changer) to work, you also need to provide a Google AI API key.
+
+**First, get your Gemini API key:**
+
+1.  Visit [Google AI Studio](https://aistudio.google.com/app/apikey).
+2.  Click **"Create API key"** and copy the generated key.
+
+**Then, add it to Vercel:**
+
+1.  In the same **Environment Variables** section on Vercel, create one more variable:
+    *   **Name:** `GEMINI_API_KEY`
+    *   **Value:** Paste the API key you got from Google AI Studio.
+
+---
+
+After adding all three environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `GEMINI_API_KEY`), ensure they are applied to all environments (Production, Preview, and Development).
+
+Finally, go to the **Deployments** tab and trigger a new deployment to apply the environment variables. Your application should now be fully functional.
