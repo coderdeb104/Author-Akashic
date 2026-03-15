@@ -1,18 +1,12 @@
+
 import { createClient } from '@/lib/supabase/server';
 import type { Fiction } from '@/lib/types';
 import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { PlusCircle, MoreHorizontal, BookCopy } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { deleteFiction } from './actions';
+import { PlusCircle, BookCopy, SearchX } from 'lucide-react';
 import { SearchBar } from '@/components/search-bar';
+import { FictionCard } from '@/components/fictions/fiction-card';
 
 export default async function FictionsPage({ searchParams }: { searchParams?: { q?: string } }) {
     const supabase = createClient();
@@ -47,55 +41,40 @@ export default async function FictionsPage({ searchParams }: { searchParams?: { 
                 </Button>
             </div>
             {fictions && fictions.length > 0 ? (
-                <div className="rounded-lg border">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {(fictions as Fiction[]).map((fiction) => (
-                                <TableRow key={fiction.id}>
-                                    <TableCell className="font-medium">{fiction.title}</TableCell>
-                                    <TableCell className="text-muted-foreground truncate max-w-sm">{fiction.description}</TableCell>
-                                    <TableCell>
-                                         <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem asChild><Link href={`/fictions/${fiction.id}/edit`}>Edit</Link></DropdownMenuItem>
-                                                <form action={deleteFiction.bind(null, fiction.id)}>
-                                                    <DropdownMenuItem asChild>
-                                                        <button type="submit" className="w-full text-left">Delete</button>
-                                                    </DropdownMenuItem>
-                                                </form>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {(fictions as Fiction[]).map((fiction) => (
+                        <FictionCard key={fiction.id} fiction={fiction} />
+                    ))}
                 </div>
             ) : (
-                <div className="flex h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/20 p-12 text-center">
-                    <BookCopy className="h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 font-headline text-2xl font-bold tracking-tight">No Fictions Yet</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        Start by adding your first book, series, or story.
-                    </p>
-                    <Button asChild className="mt-4">
-                        <Link href="/fictions/new">
-                        Create New Fiction
-                        </Link>
-                    </Button>
+                 <div className="flex h-[60vh] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/20 p-12 text-center">
+                    {query ? (
+                        <>
+                            <SearchX className="h-12 w-12 text-muted-foreground" />
+                            <h3 className="mt-4 font-headline text-2xl font-bold tracking-tight">No Fictions Found</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                Your search did not return any results.
+                            </p>
+                            <Button asChild className="mt-4" variant="outline">
+                                <Link href="/fictions">
+                                    Clear Search
+                                </Link>
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <BookCopy className="h-12 w-12 text-muted-foreground" />
+                            <h3 className="mt-4 font-headline text-2xl font-bold tracking-tight">No Fictions Yet</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                Start by adding your first book, series, or story.
+                            </p>
+                            <Button asChild className="mt-4">
+                                <Link href="/fictions/new">
+                                Create New Fiction
+                                </Link>
+                            </Button>
+                        </>
+                    )}
                 </div>
             )}
         </>

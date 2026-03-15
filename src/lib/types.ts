@@ -1,4 +1,5 @@
 
+
 export type Character = {
   id: string;
   user_id: string;
@@ -95,4 +96,6 @@ export type Fiction = {
     created_at: string;
     title: string;
     description: string | null;
+    image_url: string | null;
+    genres: string[] | null;
 };
