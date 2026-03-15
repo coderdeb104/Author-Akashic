@@ -10,6 +10,7 @@ const formSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
   description: z.string().optional().nullable(),
   area: z.string().optional().nullable(),
+  fiction_ids: z.array(z.string()).optional(),
 });
 
 export async function savePlace(placeId: string | null, formData: FormData) {
@@ -20,7 +21,13 @@ export async function savePlace(placeId: string | null, formData: FormData) {
     return { error: 'You must be logged in to save a place.' }
   }
 
-  const values = Object.fromEntries(formData.entries());
+  const values = {
+    name: formData.get('name'),
+    description: formData.get('description'),
+    area: formData.get('area'),
+    fiction_ids: formData.getAll('fiction_ids') || [],
+  };
+
   const parsed = formSchema.safeParse(values);
 
   if (!parsed.success) {

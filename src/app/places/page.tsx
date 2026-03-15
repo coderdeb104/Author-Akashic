@@ -20,6 +20,7 @@ export default async function PlacesPage({ searchParams }: {
     searchParams?: { 
         q?: string;
         area?: string;
+        fiction_id?: string;
     } 
 }) {
     const supabase = createClient();
@@ -31,6 +32,7 @@ export default async function PlacesPage({ searchParams }: {
 
     const query = searchParams?.q;
     const areaFilter = searchParams?.area;
+    const fictionFilter = searchParams?.fiction_id;
 
     const { data: areaData } = await supabase
         .from('places')
@@ -38,14 +40,16 @@ export default async function PlacesPage({ searchParams }: {
         .eq('user_id', user.id);
     const uniqueAreas = Array.from(new Set(areaData?.map(item => item.area).filter(Boolean) as string[])).sort();
 
+    const { data: fictionsData } = await supabase
+        .from('fictions')
+        .select('id, title')
+        .eq('user_id', user.id)
+        .order('title');
+
     let places;
     if (query) {
         let { data } = await supabase.rpc('search_places', { search_term: query });
-        if (areaFilter && data) {
-            places = data.filter((p: Place) => p.area === areaFilter);
-        } else {
-            places = data;
-        }
+        places = data;
     } else {
         let queryBuilder = supabase
             .from('places')
@@ -55,12 +59,25 @@ export default async function PlacesPage({ searchParams }: {
         if (areaFilter) {
             queryBuilder = queryBuilder.eq('area', areaFilter);
         }
+        if (fictionFilter) {
+            queryBuilder = queryBuilder.contains('fiction_ids', [fictionFilter]);
+        }
         
         const { data } = await queryBuilder.order('name', { ascending: true });
         places = data;
     }
 
-    const hasActiveFilters = !!areaFilter;
+    if (places && !query) {
+        if (areaFilter) {
+            places = places.filter((p: Place) => p.area === areaFilter);
+        }
+        if (fictionFilter) {
+            places = places.filter((p: Place) => p.fiction_ids && p.fiction_ids.includes(fictionFilter));
+        }
+    }
+
+
+    const hasActiveFilters = !!areaFilter || !!fictionFilter;
 
     return (
         <>
@@ -79,7 +96,8 @@ export default async function PlacesPage({ searchParams }: {
 
             <PlaceFilters
                 areas={uniqueAreas}
-                currentFilters={{ area: areaFilter }}
+                fictions={fictionsData || []}
+                currentFilters={{ area: areaFilter, fiction_id: fictionFilter }}
             />
 
             <div className="rounded-lg border">

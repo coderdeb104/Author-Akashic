@@ -5,15 +5,18 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import { Fiction } from '@/lib/types';
 
 type PlaceFiltersProps = {
   areas: string[];
+  fictions: Fiction[];
   currentFilters: {
     area?: string;
+    fiction_id?: string;
   }
 };
 
-export function PlaceFilters({ areas, currentFilters }: PlaceFiltersProps) {
+export function PlaceFilters({ areas, fictions, currentFilters }: PlaceFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -36,19 +39,27 @@ export function PlaceFilters({ areas, currentFilters }: PlaceFiltersProps) {
   const clearFilters = () => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
     current.delete('area');
+    current.delete('fiction_id');
     const search = current.toString();
     const query = search ? `?${search}` : '';
     router.push(`${pathname}${query}`, { scroll: false });
   }
 
-  const hasActiveFilters = !!currentFilters.area;
+  const hasActiveFilters = !!currentFilters.area || !!currentFilters.fiction_id;
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-2 mb-6 p-4 border rounded-lg bg-card/50">
       <h3 className="text-sm font-semibold whitespace-nowrap pr-4">Filter by:</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 flex-grow w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:flex-row md:flex-wrap gap-2 flex-grow w-full">
+        <Select onValueChange={(value) => handleFilterChange('fiction_id', value === 'all' ? '' : value)} value={currentFilters.fiction_id || 'all'}>
+            <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Fiction" /></SelectTrigger>
+            <SelectContent>
+                <SelectItem value="all">All Fictions</SelectItem>
+                {fictions.map((fiction) => <SelectItem key={fiction.id} value={fiction.id}>{fiction.title}</SelectItem>)}
+            </SelectContent>
+        </Select>
         <Select onValueChange={(value) => handleFilterChange('area', value === 'all' ? '' : value)} value={currentFilters.area || 'all'}>
-          <SelectTrigger><SelectValue placeholder="Area" /></SelectTrigger>
+          <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Area" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Areas</SelectItem>
             {areas.map((area) => <SelectItem key={area} value={area}>{area}</SelectItem>)}

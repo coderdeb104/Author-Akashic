@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 export default async function EditPlacePage({ params }: { params: { id: string } }) {
   const supabase = createClient();
+  
   const { data: place } = await supabase
     .from('places')
     .select('*')
@@ -15,6 +16,11 @@ export default async function EditPlacePage({ params }: { params: { id: string }
     notFound();
   }
 
+  const { data: fictions } = await supabase
+    .from('fictions')
+    .select('id, title')
+    .order('title');
+
   return (
     <div className="container mx-auto max-w-2xl">
       <h1 className="font-headline text-3xl font-bold text-primary sm:text-4xl">Edit Place</h1>
@@ -22,7 +28,7 @@ export default async function EditPlacePage({ params }: { params: { id: string }
         Refine the details of this location.
       </p>
       <div className="mt-8">
-        <PlaceForm place={place} />
+        <PlaceForm place={place} fictions={fictions || []} />
       </div>
     </div>
   );

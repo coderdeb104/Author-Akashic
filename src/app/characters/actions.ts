@@ -26,6 +26,7 @@ const formSchema = z.object({
   description: z.string().optional().nullable(),
   trivia: z.string().optional().nullable(),
   image_url: z.string().url().optional().nullable(),
+  fiction_ids: z.array(z.string()).optional(),
 });
 
 export async function saveCharacter(characterId: string | null, formData: FormData) {
@@ -54,6 +55,7 @@ export async function saveCharacter(characterId: string | null, formData: FormDa
         eyes: formData.get('appearance.eyes') || null,
         distinguishing_features: formData.get('appearance.distinguishing_features') || null,
     },
+    fiction_ids: formData.getAll('fiction_ids') || [],
   };
 
   const parsed = formSchema.safeParse(values);

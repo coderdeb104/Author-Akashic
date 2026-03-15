@@ -20,6 +20,7 @@ export default async function WorldbuildPage({ searchParams }: {
     searchParams?: { 
         q?: string;
         topic?: string;
+        fiction_id?: string;
     } 
 }) {
     const supabase = createClient();
@@ -31,21 +32,24 @@ export default async function WorldbuildPage({ searchParams }: {
     
     const query = searchParams?.q;
     const topicFilter = searchParams?.topic;
+    const fictionFilter = searchParams?.fiction_id;
 
     const { data: topicData } = await supabase
         .from('worldbuild')
         .select('topic')
         .eq('user_id', user.id);
     const uniqueTopics = Array.from(new Set(topicData?.map(item => item.topic).filter(Boolean) as string[])).sort();
+    
+    const { data: fictionsData } = await supabase
+        .from('fictions')
+        .select('id, title')
+        .eq('user_id', user.id)
+        .order('title');
 
     let worldbuilds;
     if (query) {
         let { data } = await supabase.rpc('search_worldbuild', { search_term: query });
-        if (topicFilter && data) {
-            worldbuilds = data.filter((entry: Worldbuild) => entry.topic === topicFilter);
-        } else {
-            worldbuilds = data;
-        }
+        worldbuilds = data;
     } else {
         let queryBuilder = supabase
             .from('worldbuild')
@@ -55,14 +59,27 @@ export default async function WorldbuildPage({ searchParams }: {
         if (topicFilter) {
             queryBuilder = queryBuilder.eq('topic', topicFilter);
         }
+        if (fictionFilter) {
+            queryBuilder = queryBuilder.contains('fiction_ids', [fictionFilter]);
+        }
         
         const { data } = await queryBuilder
             .order('topic', { ascending: true })
             .order('created_at', { ascending: false });
         worldbuilds = data;
     }
+    
+    if (worldbuilds && !query) {
+        if (topicFilter) {
+            worldbuilds = worldbuilds.filter((entry: Worldbuild) => entry.topic === topicFilter);
+        }
+        if (fictionFilter) {
+            worldbuilds = worldbuilds.filter((entry: Worldbuild) => entry.fiction_ids && entry.fiction_ids.includes(fictionFilter));
+        }
+    }
 
-    const hasActiveFilters = !!topicFilter;
+
+    const hasActiveFilters = !!topicFilter || !!fictionFilter;
 
     return (
         <>
@@ -81,7 +98,8 @@ export default async function WorldbuildPage({ searchParams }: {
             
             <WorldbuildFilters
                 topics={uniqueTopics}
-                currentFilters={{ topic: topicFilter }}
+                fictions={fictionsData || []}
+                currentFilters={{ topic: topicFilter, fiction_id: fictionFilter }}
             />
 
             <div className="rounded-lg border">

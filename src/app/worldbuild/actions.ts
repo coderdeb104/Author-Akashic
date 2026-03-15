@@ -9,6 +9,7 @@ import { z } from 'zod'
 const formSchema = z.object({
   topic: z.string().min(1, 'Topic is required.'),
   fact: z.string().optional().nullable(),
+  fiction_ids: z.array(z.string()).optional(),
 });
 
 export async function saveWorldbuild(entryId: string | null, formData: FormData) {
@@ -19,7 +20,11 @@ export async function saveWorldbuild(entryId: string | null, formData: FormData)
     return { error: 'You must be logged in to save an entry.' }
   }
 
-  const values = Object.fromEntries(formData.entries());
+  const values = {
+    topic: formData.get('topic'),
+    fact: formData.get('fact'),
+    fiction_ids: formData.getAll('fiction_ids') || [],
+  };
   const parsed = formSchema.safeParse(values);
 
   if (!parsed.success) {

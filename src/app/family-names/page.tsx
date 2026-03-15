@@ -20,6 +20,7 @@ export default async function FamilyNamesPage({ searchParams }: {
     searchParams?: { 
         q?: string;
         status?: string;
+        fiction_id?: string;
     } 
 }) {
     const supabase = createClient();
@@ -31,21 +32,24 @@ export default async function FamilyNamesPage({ searchParams }: {
     
     const query = searchParams?.q;
     const statusFilter = searchParams?.status;
+    const fictionFilter = searchParams?.fiction_id;
 
     const { data: statusData } = await supabase
         .from('family_names')
         .select('status')
         .eq('user_id', user.id);
     const uniqueStatuses = Array.from(new Set(statusData?.map(item => item.status).filter(Boolean) as string[])).sort();
+    
+    const { data: fictionsData } = await supabase
+        .from('fictions')
+        .select('id, title')
+        .eq('user_id', user.id)
+        .order('title');
 
     let familyNames;
     if (query) {
         let { data } = await supabase.rpc('search_family_names', { search_term: query });
-        if (statusFilter && data) {
-            familyNames = data.filter((fn: FamilyName) => fn.status === statusFilter);
-        } else {
-            familyNames = data;
-        }
+        familyNames = data;
     } else {
         let queryBuilder = supabase
             .from('family_names')
@@ -55,12 +59,25 @@ export default async function FamilyNamesPage({ searchParams }: {
         if (statusFilter) {
             queryBuilder = queryBuilder.eq('status', statusFilter);
         }
+        if (fictionFilter) {
+            queryBuilder = queryBuilder.contains('fiction_ids', [fictionFilter]);
+        }
 
         const { data } = await queryBuilder.order('name', { ascending: true });
         familyNames = data;
     }
+    
+    if (familyNames && !query) {
+        if (statusFilter) {
+            familyNames = familyNames.filter((fn: FamilyName) => fn.status === statusFilter);
+        }
+        if (fictionFilter) {
+            familyNames = familyNames.filter((fn: FamilyName) => fn.fiction_ids && fn.fiction_ids.includes(fictionFilter));
+        }
+    }
 
-    const hasActiveFilters = !!statusFilter;
+
+    const hasActiveFilters = !!statusFilter || !!fictionFilter;
 
     return (
         <>
@@ -79,7 +96,8 @@ export default async function FamilyNamesPage({ searchParams }: {
             
             <FamilyNameFilters
                 statuses={uniqueStatuses}
-                currentFilters={{ status: statusFilter }}
+                fictions={fictionsData || []}
+                currentFilters={{ status: statusFilter, fiction_id: fictionFilter }}
             />
 
             <div className="rounded-lg border">

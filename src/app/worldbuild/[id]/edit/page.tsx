@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 export default async function EditWorldbuildPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
+  
   const { data: entry } = await supabase
     .from('worldbuild')
     .select('*')
@@ -15,6 +16,11 @@ export default async function EditWorldbuildPage({ params }: { params: { id: str
     notFound();
   }
 
+  const { data: fictions } = await supabase
+    .from('fictions')
+    .select('id, title')
+    .order('title');
+
   return (
     <div className="container mx-auto max-w-2xl">
       <h1 className="font-headline text-3xl font-bold text-primary sm:text-4xl">Edit Worldbuild Entry</h1>
@@ -22,7 +28,7 @@ export default async function EditWorldbuildPage({ params }: { params: { id: str
         Refine this piece of lore.
       </p>
       <div className="mt-8">
-        <WorldbuildForm entry={entry} />
+        <WorldbuildForm entry={entry} fictions={fictions || []} />
       </div>
     </div>
   );

@@ -5,12 +5,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { saveEvent } from '@/app/events/actions';
-import type { Event } from '@/lib/types';
+import type { Event, Fiction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,18 +22,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { MultiSelect, type MultiSelectOption } from '../ui/multi-select';
 
 const formSchema = z.object({
     title: z.string().min(1, 'Title is required.'),
     description: z.string().optional().nullable(),
     event_date: z.string().optional().nullable(),
+    fiction_ids: z.array(z.string()).optional(),
 });
 
 type EventFormData = z.infer<typeof formSchema>;
 
-export default function EventForm({ event }: { event?: Event | null }) {
+export default function EventForm({ event, fictions }: { event?: Event | null, fictions: Fiction[] }) {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const fictionOptions: MultiSelectOption[] = fictions.map(f => ({ value: f.id, label: f.title }));
 
     const form = useForm<EventFormData>({
         resolver: zodResolver(formSchema),
@@ -40,6 +45,7 @@ export default function EventForm({ event }: { event?: Event | null }) {
             title: event?.title ?? '',
             description: event?.description ?? '',
             event_date: event?.event_date ?? '',
+            fiction_ids: event?.fiction_ids ?? [],
         },
     });
 
@@ -47,8 +53,11 @@ export default function EventForm({ event }: { event?: Event | null }) {
         setIsSubmitting(true);
         const formData = new FormData();
         Object.entries(values).forEach(([key, value]) => {
-            if (value) {
-                formData.append(key, value);
+            if (key === 'fiction_ids' && Array.isArray(value)) {
+                value.forEach(id => formData.append('fiction_ids', id));
+            }
+            else if (value) {
+                formData.append(key, value as string);
             }
         });
 
@@ -78,6 +87,31 @@ export default function EventForm({ event }: { event?: Event | null }) {
                         <FormField control={form.control} name="title" render={({ field }) => ( <FormItem><FormLabel>Title</FormLabel><FormControl><Input placeholder="e.g., The Coronation" {...field} /></FormControl><FormMessage /></FormItem> )} />
                         <FormField control={form.control} name="event_date" render={({ field }) => ( <FormItem><FormLabel>Date</FormLabel><FormControl><Input placeholder="e.g., 14th of Sun's Height" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
                         <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe the event..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
+                    </CardContent>
+                </Card>
+
+                 <Card>
+                    <CardHeader><CardTitle className="font-headline">Associations</CardTitle></CardHeader>
+                    <CardContent>
+                        <FormField
+                            control={form.control}
+                            name="fiction_ids"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Fictions</FormLabel>
+                                    <FormControl>
+                                        <MultiSelect
+                                            options={fictionOptions}
+                                            selected={field.value ?? []}
+                                            onChange={field.onChange}
+                                            placeholder="Select fictions this event belongs to..."
+                                        />
+                                    </FormControl>
+                                    <FormDescription>Link this event to one or more of your fictions.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </CardContent>
                 </Card>
 

@@ -14,8 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { deleteEvent } from './actions';
 import { SearchBar } from '@/components/search-bar';
+import { EventFilters } from '@/components/events/event-filters';
 
-export default async function EventsPage({ searchParams }: { searchParams?: { q?: string } }) {
+export default async function EventsPage({ searchParams }: { 
+    searchParams?: { 
+        q?: string;
+        fiction_id?: string;
+    } 
+}) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -24,14 +30,40 @@ export default async function EventsPage({ searchParams }: { searchParams?: { q?
     }
 
     const query = searchParams?.q;
+    const fictionFilter = searchParams?.fiction_id;
 
-    const { data: events } = query
-        ? await supabase.rpc('search_events', { search_term: query })
-        : await supabase
+    const { data: fictionsData } = await supabase
+        .from('fictions')
+        .select('id, title')
+        .eq('user_id', user.id)
+        .order('title');
+
+    let events;
+
+    if (query) {
+        const { data } = await supabase.rpc('search_events', { search_term: query });
+        events = data;
+    } else {
+        let queryBuilder = supabase
             .from('events')
             .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
+            .eq('user_id', user.id);
+        
+        if (fictionFilter) {
+            queryBuilder = queryBuilder.contains('fiction_ids', [fictionFilter]);
+        }
+
+        const { data } = await queryBuilder.order('created_at', { ascending: false });
+        events = data;
+    }
+    
+    if (events && !query) {
+        if (fictionFilter) {
+            events = events.filter((e: Event) => e.fiction_ids && e.fiction_ids.includes(fictionFilter));
+        }
+    }
+
+    const hasActiveFilters = !!fictionFilter;
 
     return (
         <>
@@ -47,6 +79,9 @@ export default async function EventsPage({ searchParams }: { searchParams?: { q?
                     </Link>
                 </Button>
             </div>
+
+            <EventFilters fictions={fictionsData || []} currentFilters={{ fiction_id: fictionFilter }} />
+
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
@@ -87,7 +122,7 @@ export default async function EventsPage({ searchParams }: { searchParams?: { q?
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={4} className="h-24 text-center">
-                                    {query ? `No events found for "${query}".` : 'No events found.'}
+                                    {query || hasActiveFilters ? `No events found for your criteria.` : 'No events found.'}
                                 </TableCell>
                             </TableRow>
                         )}

@@ -12,6 +12,7 @@ const formSchema = z.object({
   family_head: z.string().optional().nullable(),
   members: z.string().optional().nullable(),
   status: z.string().optional().nullable(),
+  fiction_ids: z.array(z.string()).optional(),
 });
 
 export async function saveFamilyName(familyNameId: string | null, formData: FormData) {
@@ -22,7 +23,14 @@ export async function saveFamilyName(familyNameId: string | null, formData: Form
     return { error: 'You must be logged in to save a family name.' }
   }
 
-  const values = Object.fromEntries(formData.entries());
+  const values = {
+    name: formData.get('name'),
+    description: formData.get('description'),
+    family_head: formData.get('family_head'),
+    members: formData.get('members'),
+    status: formData.get('status'),
+    fiction_ids: formData.getAll('fiction_ids') || [],
+  };
   const parsed = formSchema.safeParse(values);
 
   if (!parsed.success) {

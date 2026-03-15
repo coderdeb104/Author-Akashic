@@ -5,12 +5,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { saveFamilyName } from '@/app/family-names/actions';
-import type { FamilyName } from '@/lib/types';
+import type { FamilyName, Fiction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { MultiSelect, type MultiSelectOption } from '../ui/multi-select';
 
 const formSchema = z.object({
     name: z.string().min(1, 'Name is required.'),
@@ -28,13 +30,16 @@ const formSchema = z.object({
     family_head: z.string().optional().nullable(),
     members: z.string().optional().nullable(),
     status: z.string().optional().nullable(),
+    fiction_ids: z.array(z.string()).optional(),
 });
 
 type FamilyNameFormData = z.infer<typeof formSchema>;
 
-export default function FamilyNameForm({ familyName }: { familyName?: FamilyName | null }) {
+export default function FamilyNameForm({ familyName, fictions }: { familyName?: FamilyName | null, fictions: Fiction[] }) {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    const fictionOptions: MultiSelectOption[] = fictions.map(f => ({ value: f.id, label: f.title }));
 
     const form = useForm<FamilyNameFormData>({
         resolver: zodResolver(formSchema),
@@ -44,6 +49,7 @@ export default function FamilyNameForm({ familyName }: { familyName?: FamilyName
             family_head: familyName?.family_head ?? '',
             members: familyName?.members ?? '',
             status: familyName?.status ?? '',
+            fiction_ids: familyName?.fiction_ids ?? [],
         },
     });
 
@@ -51,8 +57,11 @@ export default function FamilyNameForm({ familyName }: { familyName?: FamilyName
         setIsSubmitting(true);
         const formData = new FormData();
         Object.entries(values).forEach(([key, value]) => {
-            if (value) {
-                formData.append(key, value);
+            if (key === 'fiction_ids' && Array.isArray(value)) {
+                value.forEach(id => formData.append('fiction_ids', id));
+            }
+            else if (value) {
+                formData.append(key, value as string);
             }
         });
 
@@ -86,6 +95,31 @@ export default function FamilyNameForm({ familyName }: { familyName?: FamilyName
                         <FormField control={form.control} name="status" render={({ field }) => ( <FormItem><FormLabel>Status</FormLabel><FormControl><Input placeholder="e.g., Active, Fallen" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
                         <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe the family..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
                         <FormField control={form.control} name="members" render={({ field }) => ( <FormItem><FormLabel>Notable Members</FormLabel><FormControl><Textarea placeholder="List notable family members..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
+                    </CardContent>
+                </Card>
+
+                 <Card>
+                    <CardHeader><CardTitle className="font-headline">Associations</CardTitle></CardHeader>
+                    <CardContent>
+                        <FormField
+                            control={form.control}
+                            name="fiction_ids"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Fictions</FormLabel>
+                                    <FormControl>
+                                        <MultiSelect
+                                            options={fictionOptions}
+                                            selected={field.value ?? []}
+                                            onChange={field.onChange}
+                                            placeholder="Select fictions this family appears in..."
+                                        />
+                                    </FormControl>
+                                    <FormDescription>Link this family to one or more of your fictions.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </CardContent>
                 </Card>
 

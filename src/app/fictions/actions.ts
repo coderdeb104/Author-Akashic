@@ -9,24 +9,17 @@ import { z } from 'zod'
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required.'),
   description: z.string().optional().nullable(),
-  event_date: z.string().optional().nullable(),
-  fiction_ids: z.array(z.string()).optional(),
 });
 
-export async function saveEvent(eventId: string | null, formData: FormData) {
+export async function saveFiction(fictionId: string | null, formData: FormData) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return { error: 'You must be logged in to save an event.' }
+    return { error: 'You must be logged in to save a fiction.' }
   }
 
-  const values = {
-      title: formData.get('title'),
-      description: formData.get('description'),
-      event_date: formData.get('event_date'),
-      fiction_ids: formData.getAll('fiction_ids') || [],
-  };
+  const values = Object.fromEntries(formData.entries());
   const parsed = formSchema.safeParse(values);
 
   if (!parsed.success) {
@@ -39,28 +32,28 @@ export async function saveEvent(eventId: string | null, formData: FormData) {
   }
 
   let result;
-  if (eventId) {
-    result = await supabase.from('events').update(dataToSave).eq('id', eventId);
+  if (fictionId) {
+    result = await supabase.from('fictions').update(dataToSave).eq('id', fictionId);
   } else {
-    result = await supabase.from('events').insert(dataToSave);
+    result = await supabase.from('fictions').insert(dataToSave);
   }
 
   if (result.error) {
     return { error: result.error.message }
   }
 
-  revalidatePath('/events')
-  redirect('/events')
+  revalidatePath('/fictions')
+  redirect('/fictions')
 }
 
-export async function deleteEvent(eventId: string) {
+export async function deleteFiction(fictionId: string) {
   const supabase = createClient();
-  const { error } = await supabase.from('events').delete().eq('id', eventId);
+  const { error } = await supabase.from('fictions').delete().eq('id', fictionId);
 
   if (error) {
     return { error: error.message };
   }
 
-  revalidatePath('/events');
-  redirect('/events');
+  revalidatePath('/fictions');
+  redirect('/fictions');
 }

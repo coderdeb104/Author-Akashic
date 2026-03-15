@@ -15,6 +15,7 @@ export default async function CharactersPage({ searchParams }: {
     race?: string;
     sex?: string;
     vital_status?: string;
+    fiction_id?: string;
   } 
 }) {
   const supabase = createClient();
@@ -28,6 +29,7 @@ export default async function CharactersPage({ searchParams }: {
   const raceFilter = searchParams?.race;
   const sexFilter = searchParams?.sex;
   const vitalStatusFilter = searchParams?.vital_status;
+  const fictionFilter = searchParams?.fiction_id;
 
   // Fetch unique races for filter dropdown
   const { data: raceData } = await supabase
@@ -35,6 +37,13 @@ export default async function CharactersPage({ searchParams }: {
     .select('race')
     .eq('user_id', user.id);
   const uniqueRaces = Array.from(new Set(raceData?.map(item => item.race).filter(Boolean) as string[])).sort();
+
+  // Fetch fictions for filter dropdown
+  const { data: fictionsData } = await supabase
+    .from('fictions')
+    .select('id, title')
+    .eq('user_id', user.id)
+    .order('title');
 
   let characters, error;
 
@@ -51,6 +60,7 @@ export default async function CharactersPage({ searchParams }: {
     if (raceFilter) queryBuilder = queryBuilder.eq('race', raceFilter);
     if (sexFilter) queryBuilder = queryBuilder.eq('sex', sexFilter);
     if (vitalStatusFilter) queryBuilder = queryBuilder.eq('vital_status', vitalStatusFilter);
+    if (fictionFilter) queryBuilder = queryBuilder.contains('fiction_ids', [fictionFilter]);
 
     const { data: queryData, error: queryError } = await queryBuilder.order('created_at', { ascending: false });
     characters = queryData;
@@ -66,6 +76,9 @@ export default async function CharactersPage({ searchParams }: {
     }
     if (vitalStatusFilter) {
       characters = characters.filter((c: Character) => c.vital_status === vitalStatusFilter);
+    }
+    if (fictionFilter) {
+        characters = characters.filter((c: Character) => c.fiction_ids && c.fiction_ids.includes(fictionFilter));
     }
   }
   
@@ -93,7 +106,7 @@ export default async function CharactersPage({ searchParams }: {
     );
   }
 
-  const hasActiveFilters = raceFilter || sexFilter || vitalStatusFilter;
+  const hasActiveFilters = raceFilter || sexFilter || vitalStatusFilter || fictionFilter;
 
   return (
     <>
@@ -112,7 +125,8 @@ export default async function CharactersPage({ searchParams }: {
 
       <CharacterFilters 
         races={uniqueRaces}
-        currentFilters={{ race: raceFilter, sex: sexFilter, vital_status: vitalStatusFilter }} 
+        fictions={fictionsData || []}
+        currentFilters={{ race: raceFilter, sex: sexFilter, vital_status: vitalStatusFilter, fiction_id: fictionFilter }} 
       />
 
       {(query || hasActiveFilters) && characters && characters.length === 0 && (

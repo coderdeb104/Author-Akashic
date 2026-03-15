@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 
 export default async function EditFamilyNamePage({ params }: { params: { id: string } }) {
   const supabase = createClient();
+  
   const { data: familyName } = await supabase
     .from('family_names')
     .select('*')
@@ -15,6 +16,11 @@ export default async function EditFamilyNamePage({ params }: { params: { id: str
     notFound();
   }
 
+  const { data: fictions } = await supabase
+    .from('fictions')
+    .select('id, title')
+    .order('title');
+
   return (
     <div className="container mx-auto max-w-2xl">
       <h1 className="font-headline text-3xl font-bold text-primary sm:text-4xl">Edit Family Name</h1>
@@ -22,7 +28,7 @@ export default async function EditFamilyNamePage({ params }: { params: { id: str
         Refine the details of this family name.
       </p>
       <div className="mt-8">
-        <FamilyNameForm familyName={familyName} />
+        <FamilyNameForm familyName={familyName} fictions={fictions || []} />
       </div>
     </div>
   );

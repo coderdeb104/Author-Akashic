@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
-import { Menu, Users, MapPin, Shield, Calendar, QuoteIcon, Wand2, BookText, PenTool } from "lucide-react";
+import { Menu, Users, MapPin, Shield, Calendar, QuoteIcon, Wand2, BookText, PenTool, BookCopy } from "lucide-react";
 
 const navItems = [
     { href: "/characters", icon: Users, label: "Characters" },
+    { href: "/fictions", icon: BookCopy, label: "Fictions" },
     { href: "/places", icon: MapPin, label: "Places" },
     { href: "/family-names", icon: Shield, label: "Family Names" },
     { href: "/events", icon: Calendar, label: "Events" },

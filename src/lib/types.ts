@@ -20,6 +20,7 @@ export type Character = {
   description: string | null;
   trivia: string | null;
   image_url: string | null;
+  fiction_ids: string[] | null;
 };
 
 export type Place = {
@@ -29,6 +30,7 @@ export type Place = {
     name: string;
     description: string | null;
     area: string | null;
+    fiction_ids: string[] | null;
 };
 
 export type FamilyName = {
@@ -40,6 +42,7 @@ export type FamilyName = {
     family_head: string | null;
     members: string | null;
     status: string | null;
+    fiction_ids: string[] | null;
 };
 
 export type Event = {
@@ -49,6 +52,7 @@ export type Event = {
     title: string;
     description: string | null;
     event_date: string | null;
+    fiction_ids: string[] | null;
 };
 
 export type Quote = {
@@ -65,6 +69,7 @@ export type Worldbuild = {
     created_at: string;
     topic: string;
     fact: string | null;
+    fiction_ids: string[] | null;
 };
 
 export type WorldTopic = {
@@ -82,4 +87,12 @@ export type WorldFact = {
     topic_id: string;
     summary: string;
     details: string | null;
+};
+
+export type Fiction = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    title: string;
+    description: string | null;
 };

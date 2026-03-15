@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { generateCharacterDetailAction, saveCharacter } from '@/app/characters/actions';
-import type { Character } from '@/lib/types';
+import type { Character, Fiction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
 import { Loader2, Wand2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { MultiSelect, type MultiSelectOption } from '../ui/multi-select';
 
 const formSchema = z.object({
     name: z.string().min(1, 'Name is required.'),
@@ -48,15 +49,21 @@ const formSchema = z.object({
     description: z.string().optional().nullable(),
     trivia: z.string().optional().nullable(),
     image_url: z.string().url("Must be a valid URL.").or(z.literal('')).optional().nullable(),
+    fiction_ids: z.array(z.string()).optional(),
 });
 
 type CharacterFormData = z.infer<typeof formSchema>;
 
-export default function CharacterForm({ character }: { character?: Pick<Character, 'id' | 'name' | 'intro' | 'age' | 'sex' | 'role' | 'appearance' | 'description' | 'trivia' | 'image_url' | 'race' | 'spouse' | 'vital_status'> | null }) {
+export default function CharacterForm({ character, fictions }: { 
+    character?: Pick<Character, 'id' | 'name' | 'intro' | 'age' | 'sex' | 'role' | 'appearance' | 'description' | 'trivia' | 'image_url' | 'race' | 'spouse' | 'vital_status' | 'fiction_ids'> | null,
+    fictions: Fiction[]
+}) {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
     const [isGeneratingTrivia, setIsGeneratingTrivia] = useState(false);
+
+    const fictionOptions: MultiSelectOption[] = fictions.map(f => ({ value: f.id, label: f.title }));
 
     const form = useForm<CharacterFormData>({
         resolver: zodResolver(formSchema),
@@ -78,6 +85,7 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
             description: character?.description ?? '',
             trivia: character?.trivia ?? '',
             image_url: character?.image_url ?? '',
+            fiction_ids: character?.fiction_ids ?? [],
         },
     });
 
@@ -135,7 +143,11 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
                 Object.entries(value).forEach(([subKey, subValue]) => {
                   if (subValue) formData.append(`appearance.${subKey}`, subValue);
                 });
-              } else if (key !== 'appearance') {
+              } else if (key === 'fiction_ids' && Array.isArray(value)) {
+                // Handle array for fiction_ids
+                value.forEach(id => formData.append('fiction_ids', id));
+              }
+              else if (key !== 'appearance') {
                 formData.append(key, value.toString());
               }
             }
@@ -213,6 +225,31 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
                         </Card>
                     </div>
                 </div>
+
+                <Card>
+                    <CardHeader><CardTitle className="font-headline">Associations</CardTitle></CardHeader>
+                    <CardContent>
+                        <FormField
+                            control={form.control}
+                            name="fiction_ids"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Fictions</FormLabel>
+                                    <FormControl>
+                                        <MultiSelect
+                                            options={fictionOptions}
+                                            selected={field.value ?? []}
+                                            onChange={field.onChange}
+                                            placeholder="Select fictions this character appears in..."
+                                        />
+                                    </FormControl>
+                                    <FormDescription>Link this character to one or more of your fictions.</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </CardContent>
+                </Card>
 
                 <Card>
                     <CardHeader><CardTitle className="font-headline">Personal Details</CardTitle></CardHeader>

@@ -7,16 +7,14 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import type { Fiction } from '@/lib/types';
 
-type FamilyNameFiltersProps = {
-  statuses: string[];
+type EventFiltersProps = {
   fictions: Fiction[];
   currentFilters: {
-    status?: string;
     fiction_id?: string;
   }
 };
 
-export function FamilyNameFilters({ statuses, fictions, currentFilters }: FamilyNameFiltersProps) {
+export function EventFilters({ fictions, currentFilters }: EventFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -38,14 +36,13 @@ export function FamilyNameFilters({ statuses, fictions, currentFilters }: Family
   
   const clearFilters = () => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
-    current.delete('status');
     current.delete('fiction_id');
     const search = current.toString();
     const query = search ? `?${search}` : '';
     router.push(`${pathname}${query}`, { scroll: false });
   }
 
-  const hasActiveFilters = !!currentFilters.status || !!currentFilters.fiction_id;
+  const hasActiveFilters = !!currentFilters.fiction_id;
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-2 mb-6 p-4 border rounded-lg bg-card/50">
@@ -57,13 +54,6 @@ export function FamilyNameFilters({ statuses, fictions, currentFilters }: Family
                 <SelectItem value="all">All Fictions</SelectItem>
                 {fictions.map((fiction) => <SelectItem key={fiction.id} value={fiction.id}>{fiction.title}</SelectItem>)}
             </SelectContent>
-        </Select>
-        <Select onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)} value={currentFilters.status || 'all'}>
-          <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {statuses.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}
-          </SelectContent>
         </Select>
       </div>
       {hasActiveFilters && (

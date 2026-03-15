@@ -1,7 +1,14 @@
 
 import WorldbuildForm from '@/components/worldbuild/worldbuild-form';
+import { createClient } from '@/lib/supabase/server';
 
-export default function NewWorldbuildPage() {
+export default async function NewWorldbuildPage() {
+  const supabase = createClient();
+  const { data: fictions } = await supabase
+    .from('fictions')
+    .select('id, title')
+    .order('title');
+
   return (
     <div className="container mx-auto max-w-2xl">
       <h1 className="font-headline text-3xl font-bold text-primary sm:text-4xl">Create New Worldbuild Entry</h1>
@@ -9,7 +16,7 @@ export default function NewWorldbuildPage() {
         Add a new piece of lore to your world.
       </p>
       <div className="mt-8">
-        <WorldbuildForm />
+        <WorldbuildForm fictions={fictions || []} />
       </div>
     </div>
   );
