@@ -10,7 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const ChangeToneInputSchema = z.object({
+const ChangeToneInputSchema = z.object({
   text: z.string().describe('The original text to be transformed.'),
   tone: z.string().describe('The target tone to apply to the text. e.g., "formal", "humorous", "Gen Z".'),
 });

@@ -3,8 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { changeToneAction } from '@/app/tone-changer/actions';
-import { ChangeToneInputSchema, type ChangeToneInput } from '@/ai/flows/change-tone-flow';
+import { type ChangeToneInput } from '@/ai/flows/change-tone-flow';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,11 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Sparkles, Wand2 } from 'lucide-react';
+
+const ChangeToneInputSchema = z.object({
+    text: z.string().min(1, 'Please enter some text to transform.'),
+    tone: z.string().min(1, 'Please specify a target tone.'),
+});
 
 const exampleTones = [
     'Noble and sophisticated',
