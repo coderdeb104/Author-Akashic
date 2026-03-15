@@ -1,4 +1,6 @@
 
+'use client';
+
 import type { Fiction } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
@@ -15,6 +17,10 @@ import { MoreHorizontal } from 'lucide-react';
 import { deleteFiction } from '@/app/fictions/actions';
 
 export function FictionCard({ fiction }: { fiction: Fiction }) {
+  if (fiction.image_url) {
+    console.log(`Fiction "${fiction.title}" image URL:`, fiction.image_url);
+  }
+
   return (
       <Card className="h-full flex flex-col group overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/20">
         <Link href={`/fictions/${fiction.id}/edit`} className="flex-grow flex flex-col">
