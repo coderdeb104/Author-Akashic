@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { generateCharacterDetail, type GenerateCharacterDetailInput } from '@/ai/flows/generate-character-details';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
@@ -165,4 +166,14 @@ export async function deleteCharacter(characterId: string) {
 
   revalidatePath('/characters');
   redirect('/characters');
+}
+
+export async function generateCharacterDetailAction(input: GenerateCharacterDetailInput) {
+  try {
+      const result = await generateCharacterDetail(input);
+      return { success: true, text: result.generatedText };
+  } catch (e: any) {
+      console.error(e);
+      return { success: false, error: e.message || 'Failed to generate details.' };
+  }
 }

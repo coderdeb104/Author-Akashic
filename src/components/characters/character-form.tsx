@@ -4,7 +4,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { saveCharacter } from '@/app/characters/actions';
+import { generateCharacterDetailAction, saveCharacter } from '@/app/characters/actions';
 import type { Character } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ImageUploader from './image-uploader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Wand2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formSchema = z.object({
@@ -55,6 +55,8 @@ type CharacterFormData = z.infer<typeof formSchema>;
 export default function CharacterForm({ character }: { character?: Pick<Character, 'id' | 'name' | 'intro' | 'age' | 'sex' | 'role' | 'appearance' | 'description' | 'trivia' | 'image_url' | 'race' | 'spouse' | 'vital_status'> | null }) {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+    const [isGeneratingTrivia, setIsGeneratingTrivia] = useState(false);
 
     const form = useForm<CharacterFormData>({
         resolver: zodResolver(formSchema),
@@ -78,6 +80,50 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
             image_url: character?.image_url ?? '',
         },
     });
+
+    const handleGenerateDetail = async (detailType: 'description' | 'trivia') => {
+        if (detailType === 'description') setIsGeneratingDesc(true);
+        if (detailType === 'trivia') setIsGeneratingTrivia(true);
+
+        const values = form.getValues();
+        
+        if (!values.name) {
+            toast({
+                variant: 'destructive',
+                title: 'Name is required',
+                description: 'Please enter a character name before generating details.',
+            });
+            if (detailType === 'description') setIsGeneratingDesc(false);
+            if (detailType === 'trivia') setIsGeneratingTrivia(false);
+            return;
+        }
+
+        const result = await generateCharacterDetailAction({
+            name: values.name,
+            race: values.race,
+            role: values.role,
+            intro: values.intro,
+            detailType,
+        });
+
+        if (result.success && result.text) {
+            form.setValue(detailType, result.text, { shouldValidate: true });
+            toast({
+                title: 'AI Generation Complete',
+                description: `The ${detailType} has been generated and filled in.`,
+            });
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'AI Generation Failed',
+                description: result.error,
+            });
+        }
+
+        if (detailType === 'description') setIsGeneratingDesc(false);
+        if (detailType === 'trivia') setIsGeneratingTrivia(false);
+    };
+
 
     const onSubmit = async (values: CharacterFormData) => {
         setIsSubmitting(true);
@@ -212,8 +258,32 @@ export default function CharacterForm({ character }: { character?: Pick<Characte
                 <Card>
                     <CardHeader><CardTitle className="font-headline">Narrative</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                        <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe the character's personality, backstory, and motivations..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl><FormMessage /></FormItem> )} />
-                        <FormField control={form.control} name="trivia" render={({ field }) => ( <FormItem><FormLabel>Trivia</FormLabel><FormControl><Textarea placeholder="List interesting facts, secrets, or quirks..." className="min-h-24" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="description" render={({ field }) => ( 
+                            <FormItem>
+                                <div className="flex items-center justify-between">
+                                    <FormLabel>Description</FormLabel>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => handleGenerateDetail('description')} disabled={isGeneratingDesc}>
+                                        {isGeneratingDesc ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                                        Generate
+                                    </Button>
+                                </div>
+                                <FormControl><Textarea placeholder="Describe the character's personality, backstory, and motivations..." className="min-h-32" {...field} value={field.value ?? ''}/></FormControl>
+                                <FormMessage />
+                            </FormItem> 
+                        )} />
+                        <FormField control={form.control} name="trivia" render={({ field }) => ( 
+                            <FormItem>
+                                <div className="flex items-center justify-between">
+                                    <FormLabel>Trivia</FormLabel>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => handleGenerateDetail('trivia')} disabled={isGeneratingTrivia}>
+                                        {isGeneratingTrivia ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                                        Generate
+                                    </Button>
+                                </div>
+                                <FormControl><Textarea placeholder="List interesting facts, secrets, or quirks..." className="min-h-24" {...field} value={field.value ?? ''} /></FormControl>
+                                <FormMessage />
+                            </FormItem> 
+                        )} />
                     </CardContent>
                 </Card>
 
