@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -8,9 +9,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui
 import { Menu, Users, MapPin, Shield, Calendar, QuoteIcon, Wand2, BookText, PenTool, BookCopy, UsersRound } from "lucide-react";
 
 const navItems = [
+    { href: "/fictions", icon: BookCopy, label: "Fictions" },
     { href: "/characters", icon: Users, label: "Characters" },
     { href: "/minor-characters", icon: UsersRound, label: "Minor Characters" },
-    { href: "/fictions", icon: BookCopy, label: "Fictions" },
     { href: "/places", icon: MapPin, label: "Places" },
     { href: "/family-names", icon: Shield, label: "Family Names" },
     { href: "/events", icon: Calendar, label: "Events" },
