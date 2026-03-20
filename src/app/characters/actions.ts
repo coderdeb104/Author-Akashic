@@ -30,23 +30,7 @@ const formSchema = z.object({
   fiction_ids: z.array(z.string()).optional(),
 });
 
-const envCheck = () => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        return { error: 'Supabase environment variables (URL and anon key) are not set. Please check your Vercel project settings.' };
-    }
-    return null;
-}
-
-const getDbErrorMessage = (message: string): string => {
-    const supUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const urlHint = supUrl ? ` (Project URL starts with: ${supUrl.substring(0, 20)}...)` : ' (Project URL not found in environment variables!)';
-    return `${message}.${urlHint}`;
-}
-
 export async function saveCharacter(characterId: string | null, formData: FormData) {
-  const envError = envCheck();
-  if (envError) return envError;
-
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -97,7 +81,7 @@ export async function saveCharacter(characterId: string | null, formData: FormDa
   }
 
   if (result.error) {
-    return { error: getDbErrorMessage(result.error.message) }
+    return { error: result.error.message }
   }
 
   revalidatePath('/characters')
@@ -108,9 +92,6 @@ export async function saveCharacter(characterId: string | null, formData: FormDa
 }
 
 export async function uploadImage(formData: FormData) {
-  const envError = envCheck();
-  if (envError) return envError;
-
   const file = formData.get('file') as File;
   if (!file) {
     return { error: 'No file provided.' };
@@ -131,7 +112,7 @@ export async function uploadImage(formData: FormData) {
 
   if (error) {
     console.error('Upload error:', error)
-    return { error: getDbErrorMessage(`Upload failed: ${error.message}`) };
+    return { error: `Upload failed: ${error.message}` };
   }
   
   const { data: { publicUrl } } = supabase.storage
@@ -142,9 +123,6 @@ export async function uploadImage(formData: FormData) {
 }
 
 export async function deleteCharacter(characterId: string) {
-  const envError = envCheck();
-  if (envError) return envError;
-
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -161,7 +139,7 @@ export async function deleteCharacter(characterId: string) {
     .single();
 
   if (fetchError) {
-    return { error: getDbErrorMessage('Could not find character to delete.') };
+    return { error: 'Could not find character to delete.' };
   }
 
   // If there's an image, delete it from storage
@@ -186,7 +164,7 @@ export async function deleteCharacter(characterId: string) {
     .eq('id', characterId);
 
   if (deleteError) {
-    return { error: getDbErrorMessage(deleteError.message) };
+    return { error: deleteError.message };
   }
 
   revalidatePath('/characters');
