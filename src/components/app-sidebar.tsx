@@ -56,7 +56,7 @@ export default function AppSidebar({ isMobile = false }: { isMobile?: boolean })
                     <SheetHeader>
                         <SheetTitle className="sr-only">Main Menu</SheetTitle>
                     </SheetHeader>
-                    <Link href="/characters" className="flex items-center space-x-2 px-4 mb-4">
+                    <Link href="/fictions" className="flex items-center space-x-2 px-4 mb-4">
                         <Wand2 className="h-6 w-6 text-primary" />
                         <span className="font-headline text-lg font-bold">Writer Akashic</span>
                     </Link>
