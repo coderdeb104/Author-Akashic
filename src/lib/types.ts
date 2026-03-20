@@ -99,3 +99,12 @@ export type Fiction = {
     image_url: string | null;
     genres: string[] | null;
 };
+
+export type MinorCharacter = {
+    id: string;
+    user_id: string;
+    created_at: string;
+    name: string;
+    description: string | null;
+    fiction_ids: string[] | null;
+};
