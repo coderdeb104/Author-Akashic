@@ -1,3 +1,4 @@
+
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
@@ -34,6 +35,12 @@ const envCheck = () => {
         return { error: 'Supabase environment variables (URL and anon key) are not set. Please check your Vercel project settings.' };
     }
     return null;
+}
+
+const getDbErrorMessage = (message: string): string => {
+    const supUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const urlHint = supUrl ? ` (Project URL starts with: ${supUrl.substring(0, 20)}...)` : ' (Project URL not found in environment variables!)';
+    return `${message}.${urlHint}`;
 }
 
 export async function saveCharacter(characterId: string | null, formData: FormData) {
@@ -90,7 +97,7 @@ export async function saveCharacter(characterId: string | null, formData: FormDa
   }
 
   if (result.error) {
-    return { error: result.error.message }
+    return { error: getDbErrorMessage(result.error.message) }
   }
 
   revalidatePath('/characters')
@@ -124,7 +131,7 @@ export async function uploadImage(formData: FormData) {
 
   if (error) {
     console.error('Upload error:', error)
-    return { error: `Upload failed: ${error.message}` };
+    return { error: getDbErrorMessage(`Upload failed: ${error.message}`) };
   }
   
   const { data: { publicUrl } } = supabase.storage
@@ -154,7 +161,7 @@ export async function deleteCharacter(characterId: string) {
     .single();
 
   if (fetchError) {
-    return { error: 'Could not find character to delete.' };
+    return { error: getDbErrorMessage('Could not find character to delete.') };
   }
 
   // If there's an image, delete it from storage
@@ -179,7 +186,7 @@ export async function deleteCharacter(characterId: string) {
     .eq('id', characterId);
 
   if (deleteError) {
-    return { error: deleteError.message };
+    return { error: getDbErrorMessage(deleteError.message) };
   }
 
   revalidatePath('/characters');

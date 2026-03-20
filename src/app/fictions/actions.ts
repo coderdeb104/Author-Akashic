@@ -20,6 +20,12 @@ const envCheck = () => {
     return null;
 }
 
+const getDbErrorMessage = (message: string): string => {
+    const supUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const urlHint = supUrl ? ` (Project URL starts with: ${supUrl.substring(0, 20)}...)` : ' (Project URL not found in environment variables!)';
+    return `${message}.${urlHint}`;
+}
+
 export async function saveFiction(fictionId: string | null, formData: FormData) {
   const envError = envCheck();
   if (envError) return envError;
@@ -58,7 +64,7 @@ export async function saveFiction(fictionId: string | null, formData: FormData) 
   }
 
   if (result.error) {
-    return { error: result.error.message }
+    return { error: getDbErrorMessage(result.error.message) }
   }
 
   revalidatePath('/fictions')
@@ -93,7 +99,7 @@ export async function uploadFictionImage(formData: FormData) {
 
   if (error) {
     console.error('Upload error:', error)
-    return { error: `Upload failed: ${error.message}` };
+    return { error: getDbErrorMessage(`Upload failed: ${error.message}`) };
   }
   
   const { data: { publicUrl } } = supabase.storage
@@ -124,7 +130,7 @@ export async function deleteFiction(fictionId: string) {
     .single();
 
   if (fetchError) {
-    return { error: 'Could not find fiction to delete.' };
+    return { error: getDbErrorMessage('Could not find fiction to delete.') };
   }
 
   // If there's an image, delete it from storage
@@ -147,7 +153,7 @@ export async function deleteFiction(fictionId: string) {
   const { error: deleteError } = await supabase.from('fictions').delete().eq('id', fictionId);
 
   if (deleteError) {
-    return { error: deleteError.message };
+    return { error: getDbErrorMessage(deleteError.message) };
   }
 
   revalidatePath('/fictions');

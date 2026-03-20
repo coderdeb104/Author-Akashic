@@ -11,7 +11,23 @@ const formSchema = z.object({
   speaker: z.string().optional().nullable(),
 });
 
+const envCheck = () => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        return { error: 'Supabase environment variables (URL and anon key) are not set. Please check your Vercel project settings.' };
+    }
+    return null;
+}
+
+const getDbErrorMessage = (message: string): string => {
+    const supUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const urlHint = supUrl ? ` (Project URL starts with: ${supUrl.substring(0, 20)}...)` : ' (Project URL not found in environment variables!)';
+    return `${message}.${urlHint}`;
+}
+
 export async function saveQuote(quoteId: string | null, formData: FormData) {
+  const envError = envCheck();
+  if (envError) return envError;
+
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -39,7 +55,7 @@ export async function saveQuote(quoteId: string | null, formData: FormData) {
   }
 
   if (result.error) {
-    return { error: result.error.message }
+    return { error: getDbErrorMessage(result.error.message) }
   }
 
   revalidatePath('/quotes')
@@ -47,11 +63,14 @@ export async function saveQuote(quoteId: string | null, formData: FormData) {
 }
 
 export async function deleteQuote(quoteId: string) {
+  const envError = envCheck();
+  if (envError) return envError;
+
   const supabase = createClient();
   const { error } = await supabase.from('quotes').delete().eq('id', quoteId);
 
   if (error) {
-    return { error: error.message };
+    return { error: getDbErrorMessage(error.message) };
   }
 
   revalidatePath('/quotes');
